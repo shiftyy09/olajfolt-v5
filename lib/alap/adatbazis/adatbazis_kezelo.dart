@@ -1,14 +1,12 @@
+// lib/alap/adatbazis/adatbazis_kezelo.dart
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class AdatbazisKezelo {
-  // === JAVÍTOTT SINGLETON KEZELÉS ===
   static final AdatbazisKezelo instance = AdatbazisKezelo._privateConstructor();
   static Database? _database;
 
   AdatbazisKezelo._privateConstructor();
-
-  // ===================================
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -19,8 +17,15 @@ class AdatbazisKezelo {
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
+
+    // ========================================================
+    // ===               FONTOS VÁLTOZTATÁS ITT             ===
+    // ========================================================
     return await openDatabase(path,
-        version: 5, onCreate: _createAllTables, onUpgrade: _onUpgrade);
+        version: 6, // <<<--- NÖVELD MEG A VERZIÓSZÁMOT!
+        onCreate: _createAllTables,
+        onUpgrade: _onUpgrade);
+    // ========================================================
   }
 
   Future<void> _createAllTables(Database db, int version) async {
@@ -33,10 +38,12 @@ class AdatbazisKezelo {
         licensePlate TEXT NOT NULL UNIQUE,
         vin TEXT,
         mileage INTEGER NOT NULL,
-        vezerlesTipusa TEXT NOT NULL,
-        imagePath TEXT
+        vezerlesTipusa TEXT,
+        imagePath TEXT,
+        muszakiErvenyesseg TEXT -- <<<--- ÚJ OSZLOP HOZZÁADVA
       )
     ''');
+
     await db.execute('''
       CREATE TABLE services (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -50,14 +57,19 @@ class AdatbazisKezelo {
     ''');
   }
 
+  // Ez a metódus lefut, ha a verziószám magasabb, mint az előző
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    // Egyszerűsített megoldás: Eldobjuk a régi táblákat és újra létrehozzuk őket.
+    // Ez fejlesztés alatt a legegyszerűbb. Később lehet finomítani, hogy ne törölje az adatokat.
     await db.execute('DROP TABLE IF EXISTS services');
     await db.execute('DROP TABLE IF EXISTS vehicles');
     await _createAllTables(db, newVersion);
+    print(
+        "Adatbázis séma frissítve $oldVersion verzióról $newVersion verzióra.");
   }
 
-  // --- CRUD és egyéb műveletek (VÁLTOZATLANOK) ---
-
+  // === CRUD és egyéb műveletek (VÁLTOZATLANOK) ---
+  // ... (A többi függvényed, mint pl. getVehicles, insert, stb. itt változatlan marad)
   Future<int> insert(String table, Map<String, dynamic> row) async {
     final db = await database;
     return await db.insert(table, row);
@@ -100,8 +112,8 @@ class AdatbazisKezelo {
 
   Future<int> deleteServicesForVehicle(int vehicleId) async {
     final db = await database;
-    return await db
-        .delete('services', where: 'vehicleId = ?', whereArgs: [vehicleId]);
+    return await db.delete(
+        'services', where: 'vehicleId = ?', whereArgs: [vehicleId]);
   }
 
   Future<void> clearAllData() async {

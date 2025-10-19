@@ -34,22 +34,24 @@ class _InditoKepernyoState extends State<InditoKepernyo>
     );
   }
 
-  // === JAVÍTVA A MINIMÁLIS VÁRAKOZÁSI IDŐVEL ===
+  // ==========================================================
+  // ===          JAVÍTVA A MINIMÁLIS VÁRAKOZÁSI IDŐVEL       ===
+  // ==========================================================
   void _initializeApp() async {
-    // Rögzítjük a kezdési időpontot
-    final startTime = DateTime.now();
-
-    // 1. Elindítjuk az adatbázis betöltését
+    // 1. Elindítjuk az adatbázis betöltését (ez a háttérben fut)
     final dbFuture = AdatbazisKezelo.instance.database;
 
-    // 2. Létrehozunk egy jövőbeli eseményt, ami egy minimális idő múlva teljesül
-    // Itt állíthatod a várakozási időt, most 2500ms = 2.5 másodperc
-    final minDelayFuture = Future.delayed(const Duration(milliseconds: 1400));
+    // 2. Létrehozunk egy másik jövőbeli eseményt, ami egy fix idő múlva teljesül.
+    // EZ A SOR GARANTÁLJA A MINIMÁLIS MEGJELENÉSI IDŐT.
+    // Állítsd be, amilyen hosszúra szeretnéd (pl. 2000ms = 2 másodperc).
+    final minDelayFuture = Future.delayed(const Duration(milliseconds: 2000));
 
-    // A Future.wait megvárja, amíg MINDKÉT művelet befejeződik
+    // 3. A Future.wait megvárja, amíg MINDKÉT művelet befejeződik.
+    // - Ha a DB lassan tölt be (>2s), akkor a DB-re várunk.
+    // - Ha a DB gyorsan betölt (<2s), akkor is megvárjuk a 2 másodpercet.
     await Future.wait([dbFuture, minDelayFuture]);
 
-    // Navigáció, csak ha a képernyő még létezik
+    // 4. Navigáció a főoldalra, csak ha a képernyő még létezik a fán.
     if (mounted) {
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
@@ -63,7 +65,7 @@ class _InditoKepernyoState extends State<InditoKepernyo>
     }
   }
 
-  // ===============================================
+  // ==========================================================
 
   @override
   void dispose() {

@@ -1,5 +1,3 @@
-// lib/modellek/jarmu.dart
-
 class Jarmu {
   final int? id;
   final String make;
@@ -9,7 +7,8 @@ class Jarmu {
   final String? vin;
   final int mileage;
   final String? vezerlesTipusa;
-  final String? imagePath; // <-- ÚJ MEZŐ
+  final String? imagePath;
+  final DateTime? muszakiErvenyesseg; // <<<--- ÚJ MEZŐ
 
   Jarmu({
     this.id,
@@ -20,7 +19,8 @@ class Jarmu {
     this.vin,
     required this.mileage,
     this.vezerlesTipusa,
-    this.imagePath, // <-- ÚJ PARAMÉTER
+    this.imagePath,
+    this.muszakiErvenyesseg, // <<<--- ÚJ PARAMÉTER
   });
 
   Map<String, dynamic> toMap() {
@@ -33,21 +33,25 @@ class Jarmu {
       'vin': vin,
       'mileage': mileage,
       'vezerlesTipusa': vezerlesTipusa,
-      'imagePath': imagePath, // <-- ÚJ
+      'imagePath': imagePath,
+      'muszakiErvenyesseg': muszakiErvenyesseg?.toIso8601String(), // <<<--- ÚJ
     };
   }
 
   factory Jarmu.fromMap(Map<String, dynamic> map) {
     return Jarmu(
-      id: map['id'],
-      make: map['make'],
-      model: map['model'],
-      year: map['year'],
-      licensePlate: map['licensePlate'],
-      vin: map['vin'],
-      mileage: map['mileage'],
-      vezerlesTipusa: map['vezerlesTipusa'],
-      imagePath: map['imagePath'], // <-- ÚJ
+      id: map['id'] as int?,
+      make: map['make'] as String,
+      model: map['model'] as String,
+      year: map['year'] as int,
+      licensePlate: map['licensePlate'] as String,
+      vin: map['vin'] as String?,
+      mileage: map['mileage'] as int,
+      vezerlesTipusa: map['vezerlesTipusa'] as String?,
+      imagePath: map['imagePath'] as String?,
+      muszakiErvenyesseg: map['muszakiErvenyesseg'] == null
+          ? null
+          : DateTime.parse(map['muszakiErvenyesseg'] as String), // <<<--- ÚJ
     );
   }
 
@@ -60,7 +64,8 @@ class Jarmu {
     String? vin,
     int? mileage,
     String? vezerlesTipusa,
-    String? imagePath, // <-- ÚJ
+    String? imagePath,
+    DateTime? muszakiErvenyesseg, // <<<--- ÚJ
   }) {
     return Jarmu(
       id: id ?? this.id,
@@ -71,7 +76,9 @@ class Jarmu {
       vin: vin ?? this.vin,
       mileage: mileage ?? this.mileage,
       vezerlesTipusa: vezerlesTipusa ?? this.vezerlesTipusa,
-      imagePath: imagePath ?? this.imagePath, // <-- ÚJ
+      imagePath: imagePath ?? this.imagePath,
+      muszakiErvenyesseg: muszakiErvenyesseg ??
+          this.muszakiErvenyesseg, // <<<--- ÚJ
     );
   }
 }

@@ -10,7 +10,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # A te meglévő csomagjaid
   cupertino_icons: ^1.0.6
   sqflite: ^2.3.0
   path: ^1.8.3
@@ -25,11 +24,11 @@ dependencies:
   permission_handler: ^11.3.1
   device_info_plus: ^10.1.0
   image_picker: ^1.1.2
-
-  # === EZ A KÉT SOR HIÁNYZOTT ===
   csv: ^6.0.0
   file_picker: ^8.0.0
-  # ==============================
+  flutter_local_notifications: ^17.1.2
+  timezone: ^0.9.3
+
 
 
 dev_dependencies:

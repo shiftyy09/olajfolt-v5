@@ -43,7 +43,6 @@ class _KarbantartasEmlekeztetoState extends State<KarbantartasEmlekezteto> {
     };
   }
 
-
   @override
   void dispose() {
     _mileageController.dispose();
@@ -61,7 +60,9 @@ class _KarbantartasEmlekeztetoState extends State<KarbantartasEmlekezteto> {
       return;
     }
 
-    Jarmu? selected = vehicles.length == 1 ? vehicles.first : await showDialog(
+    Jarmu? selected = vehicles.length == 1
+        ? vehicles.first
+        : await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) =>
@@ -69,18 +70,21 @@ class _KarbantartasEmlekeztetoState extends State<KarbantartasEmlekezteto> {
             backgroundColor: const Color(0xFF1E1E1E),
             title: const Text(
                 'Válassz járművet!', style: TextStyle(color: Colors.white)),
-            content: SizedBox(width: double.maxFinite, child: ListView.builder(
-              shrinkWrap: true, itemCount: vehicles.length,
-              itemBuilder: (context, index) =>
-                  ListTile(
-                    title: Text(
-                        '${vehicles[index].make} ${vehicles[index].model}',
-                        style: const TextStyle(color: Colors.white)),
-                    subtitle: Text(vehicles[index].licensePlate,
-                        style: const TextStyle(color: Colors.white70)),
-                    onTap: () => Navigator.of(context).pop(vehicles[index]),
-                  ),
-            )),
+            content: SizedBox(
+                width: double.maxFinite,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: vehicles.length,
+                  itemBuilder: (context, index) =>
+                      ListTile(
+                        title: Text(
+                            '${vehicles[index].make} ${vehicles[index].model}',
+                            style: const TextStyle(color: Colors.white)),
+                        subtitle: Text(vehicles[index].licensePlate,
+                            style: const TextStyle(color: Colors.white70)),
+                        onTap: () => Navigator.of(context).pop(vehicles[index]),
+                      ),
+                )),
           ),
     );
     if (selected != null) {
@@ -94,10 +98,9 @@ class _KarbantartasEmlekeztetoState extends State<KarbantartasEmlekezteto> {
     setState(() {
       _selectedVehicle = vehicle;
       _mileageController.text = vehicle.mileage.toString();
-      _serviceHistoryFuture =
-          AdatbazisKezelo.instance.getServicesForVehicle(vehicle.id!)
-              .then((data) =>
-              data.map((item) => Szerviz.fromMap(item)).toList());
+      _serviceHistoryFuture = AdatbazisKezelo.instance
+          .getServicesForVehicle(vehicle.id!)
+          .then((data) => data.map((item) => Szerviz.fromMap(item)).toList());
     });
   }
 
@@ -175,7 +178,6 @@ class _KarbantartasEmlekeztetoState extends State<KarbantartasEmlekezteto> {
                         isDateBased ? Icons.calendar_today : Icons.speed,
                         color: Colors.amber)),
                 readOnly: isDateBased,
-                // A dátumválasztó miatt nem szerkeszthető
                 onTap: isDateBased
                     ? () async {
                   DateTime? pickedDate = await showDatePicker(
@@ -225,7 +227,6 @@ class _KarbantartasEmlekeztetoState extends State<KarbantartasEmlekezteto> {
     }
   }
 
-  // === ÚJ FUNKCIÓ: Intervallumok szerkesztése ===
   void _editIntervals() async {
     Map<String, TextEditingController> kmControllers = {
       for (var item in _serviceIntervals.entries)
@@ -271,7 +272,6 @@ class _KarbantartasEmlekeztetoState extends State<KarbantartasEmlekezteto> {
                   child: const Text(
                       'Mentés', style: TextStyle(color: Colors.black)),
                   onPressed: () {
-                    // Itt frissítjük a state-ben lévő intervallumokat
                     setState(() {
                       for (var entry in kmControllers.entries) {
                         _serviceIntervals[entry.key] =
@@ -297,7 +297,6 @@ class _KarbantartasEmlekeztetoState extends State<KarbantartasEmlekezteto> {
     }
   }
 
-  // Segéd widget az intervallum szerkesztő sorhoz
   Widget _buildIntervalEditorRow(String label,
       TextEditingController controller) {
     return Padding(
@@ -328,6 +327,7 @@ class _KarbantartasEmlekeztetoState extends State<KarbantartasEmlekezteto> {
     );
   }
 
+  // === JAVÍTOTT, BŐVÍTETT INFORMÁCIÓS DIALÓGUS ===
   void _showInfoDialog() {
     showDialog(
         context: context,
@@ -335,10 +335,11 @@ class _KarbantartasEmlekeztetoState extends State<KarbantartasEmlekezteto> {
             AlertDialog(
               backgroundColor: const Color(0xFF1E1E1E),
               title: Row(children: [
-                Icon(Icons.info_outline, color: Colors.amber), // JAVÍTVA
+                Icon(Icons.info_outline, color: Colors.amber),
                 SizedBox(width: 10),
+                // JAVÍTVA: Kisebb betűméret a címnek
                 Text('Emlékeztető működése',
-                    style: TextStyle(color: Colors.white))
+                    style: TextStyle(color: Colors.white, fontSize: 18))
               ]),
               content: SingleChildScrollView(
                 child: Column(
@@ -347,7 +348,7 @@ class _KarbantartasEmlekeztetoState extends State<KarbantartasEmlekezteto> {
                     Text(
                         'Ez a képernyő a Szerviznapló bejegyzései alapján automatikusan kiszámolja a következő karbantartások esedékességét.',
                         style: TextStyle(color: Colors.white70)),
-                    SizedBox(height: 15),
+                    SizedBox(height: 16),
                     Text(
                         '1. A felső sávban mindig frissítheted az aktuális km-óra állást.',
                         style: TextStyle(color: Colors.white70)),
@@ -357,22 +358,44 @@ class _KarbantartasEmlekeztetoState extends State<KarbantartasEmlekezteto> {
                     Text(
                         '3. Kiszámolja és vizuálisan jelzi, mennyi van hátra a következő cseréig.',
                         style: TextStyle(color: Colors.white70)),
-                    SizedBox(height: 15),
+                    SizedBox(height: 16),
+                    // === ÚJ, FONTOS RÉSZ ===
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.notifications_active, color: Colors.amber,
+                              size: 20),
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'A háttérben futó értesítésekhez engedélyezd a funkciót a "Beállítások" menüpontban!',
+                              style: TextStyle(color: Colors.amber.shade200),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // =========================
+                    SizedBox(height: 16),
                     Text(
-                        'ÚJ: Hosszan nyomva egy kártyát, manuálisan is módosíthatod az utolsó csere adatát!',
-                        style: TextStyle(color: Colors.amber)),
+                        'Hosszan nyomva egy kártyát, manuálisan is módosíthatod az utolsó csere adatát.',
+                        style: TextStyle(color: Colors.white70)),
                     SizedBox(height: 8),
                     Text(
-                        'ÚJ: Az AppBar-on lévő beállítások ikonnal (⚙️) testreszabhatod a csereintervallumokat.',
-                        style: TextStyle(color: Colors.amber)), // JAVÍTVA
+                        'Az AppBar-on lévő beállítások ikonnal (⚙️) testreszabhatod a csereintervallumokat.',
+                        style: TextStyle(color: Colors.white70)),
                   ],
                 ),
               ),
               actions: [
                 TextButton(onPressed: () => Navigator.of(context).pop(),
-                    child: Text(
-                        'Értem', style: TextStyle(color: Colors.amber)))
-                // JAVÍTVA
+                    child: Text('Értem', style: TextStyle(color: Colors.amber)))
               ],
             ));
   }
@@ -389,17 +412,14 @@ class _KarbantartasEmlekeztetoState extends State<KarbantartasEmlekezteto> {
         elevation: 0,
         actions: [
           if (_selectedVehicle != null) IconButton(
-              icon: const Icon(Icons.settings, color: Colors.amber), // JAVÍTVA
+              icon: const Icon(Icons.settings, color: Colors.amber),
               tooltip: 'Intervallumok szerkesztése',
               onPressed: _editIntervals),
           if (_selectedVehicle != null) IconButton(
               icon: const Icon(Icons.swap_horiz, color: Colors.amber),
-              // JAVÍTVA
               tooltip: 'Másik jármű választása',
               onPressed: () => _selectVehicle(context)),
-          IconButton(
-              icon: const Icon(Icons.info_outline, color: Colors.amber),
-              // JAVÍTVA
+          IconButton(icon: const Icon(Icons.info_outline, color: Colors.amber),
               tooltip: 'Hogyan működik?',
               onPressed: _showInfoDialog),
         ],
@@ -453,9 +473,7 @@ class _KarbantartasEmlekeztetoState extends State<KarbantartasEmlekezteto> {
                 if (lastService != null) {
                   String cardTitle = keyword == 'Olaj'
                       ? 'Olajcsere'
-                      : keyword == 'Vezérlés'
-                      ? 'Vezérléscsere'
-                      : keyword;
+                      : keyword == 'Vezérlés' ? 'Vezérléscsere' : keyword;
                   cards.add(_buildMileageCard(
                       currentVehicleMileage: _selectedVehicle!.mileage,
                       title: cardTitle,
@@ -473,26 +491,26 @@ class _KarbantartasEmlekeztetoState extends State<KarbantartasEmlekezteto> {
                       style: TextStyle(color: Colors.white70, fontSize: 18)),
                 ));
               }
+              // Kártyák rendezése a státusz színe alapján (piros, narancs, zöld)
               cards.sort((a, b) {
-                final colorA = a is Card
-                    ? (a.shape as RoundedRectangleBorder).side.color
-                    : Colors.transparent;
-                final colorB = b is Card
-                    ? (b.shape as RoundedRectangleBorder).side.color
-                    : Colors.transparent;
-                if (colorA == Colors.red.shade400 &&
-                    colorB != Colors.red.shade400) return -1;
-                if (colorB == Colors.red.shade400 &&
-                    colorA != Colors.red.shade400) return 1;
-                return 0;
+                final colorA = a is Card ? (a.shape as RoundedRectangleBorder)
+                    .side.color : Colors.transparent;
+                final colorB = b is Card ? (b.shape as RoundedRectangleBorder)
+                    .side.color : Colors.transparent;
+                int scoreA = colorA == Colors.red.shade400 ? 0 : colorA ==
+                    Colors.amber.shade400 ? 1 : 2;
+                int scoreB = colorB == Colors.red.shade400 ? 0 : colorB ==
+                    Colors.amber.shade400 ? 1 : 2;
+                return scoreA.compareTo(scoreB);
               });
 
               return ListView.builder(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
                 itemCount: cards.length,
                 itemBuilder: (context, index) =>
-                    Padding(padding: const EdgeInsets.only(bottom: 12.0),
-                        child: cards[index]),
+                    Padding(
+                    padding: const EdgeInsets.only(bottom: 12.0),
+                    child: cards[index]),
               );
             },
           ),
@@ -509,12 +527,11 @@ class _KarbantartasEmlekeztetoState extends State<KarbantartasEmlekezteto> {
           decoration: BoxDecoration(color: const Color(0xFF1E1E1E),
               borderRadius: BorderRadius.circular(12)),
           child: Row(children: [
-            const Icon(Icons.speed, color: Colors.amber), // JAVÍTVA
+            const Icon(Icons.speed, color: Colors.amber),
             const SizedBox(width: 12),
             Expanded(child: TextField(
               controller: _mileageController,
-              style: const TextStyle(
-                  color: Colors.white,
+              style: const TextStyle(color: Colors.white,
                   fontSize: 20,
                   fontWeight: FontWeight.bold),
               decoration: const InputDecoration(
@@ -527,7 +544,7 @@ class _KarbantartasEmlekeztetoState extends State<KarbantartasEmlekezteto> {
             )),
             ElevatedButton(onPressed: _updateMileage,
               style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amber, // JAVÍTVA
+                  backgroundColor: Colors.amber,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8))),
               child: const Text(
@@ -550,35 +567,37 @@ class _KarbantartasEmlekeztetoState extends State<KarbantartasEmlekezteto> {
       elevation: 4,
       color: const Color(0xFF1E1E1E),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15),
-          side: BorderSide(color: statusColor, width: 1)),
+          side: BorderSide(color: statusColor, width: 1.5)),
       child: InkWell(
         borderRadius: BorderRadius.circular(15),
         onLongPress: () => _editLastEvent(exam),
         child: Padding(
-            padding: const EdgeInsets.all(16.0), child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Icon(_getIconDataForService(title),
-                color: statusColor, size: 20),
-            SizedBox(width: 10),
-            Text(title, style: const TextStyle(
-                color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold))
-          ]),
-          const Divider(height: 24, color: Colors.white24),
-          Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            _buildInfoColumn(
-                'Utolsó esemény', DateFormat('yyyy.MM.dd').format(exam.date)),
-            _buildInfoColumn(
-                'Lejárat', DateFormat('yyyy.MM.dd').format(expiryDate)),
-          ]),
-          const SizedBox(height: 16),
-          Align(alignment: Alignment.center, child: Text(
-              daysLeft > 0 ? '$daysLeft nap van hátra' : 'Lejárt!',
-              style: TextStyle(color: statusColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18))),
-        ])),
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                Icon(_getIconDataForService(title), color: statusColor,
+                    size: 20),
+                SizedBox(width: 10),
+                Text(title, style: const TextStyle(color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold))
+              ]),
+              const Divider(height: 24, color: Colors.white24),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                _buildInfoColumn('Utolsó esemény',
+                    DateFormat('yyyy.MM.dd').format(exam.date)),
+                _buildInfoColumn(
+                    'Lejárat', DateFormat('yyyy.MM.dd').format(expiryDate)),
+              ]),
+              const SizedBox(height: 16),
+              Align(alignment: Alignment.center,
+                  child: Text(
+                      daysLeft > 0 ? '$daysLeft nap van hátra' : 'Lejárt!',
+                      style: TextStyle(color: statusColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18))),
+            ])),
       ),
     );
   }
@@ -594,45 +613,46 @@ class _KarbantartasEmlekeztetoState extends State<KarbantartasEmlekezteto> {
       elevation: 4,
       color: const Color(0xFF1E1E1E),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15),
-          side: BorderSide(color: statusColor, width: 1)),
+          side: BorderSide(color: statusColor, width: 1.5)),
       child: InkWell(
         borderRadius: BorderRadius.circular(15),
         onLongPress: () => _editLastEvent(lastService),
         child: Padding(
-            padding: const EdgeInsets.all(16.0), child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Icon(_getIconDataForService(title),
-                color: statusColor, size: 20),
-            SizedBox(width: 10),
-            Text(title, style: const TextStyle(
-                color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold))
-          ]),
-          const Divider(height: 24, color: Colors.white24),
-          Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            _buildInfoColumn('Előző csere',
-                '${NumberFormat.decimalPattern('hu_HU').format(
-                    lastService.mileage)} km'),
-            _buildInfoColumn('Intervallum',
-                '${NumberFormat.decimalPattern('hu_HU').format(interval)} km')
-          ]),
-          const SizedBox(height: 16),
-          LinearProgressIndicator(value: progress,
-              backgroundColor: Colors.grey.shade800,
-              color: statusColor,
-              minHeight: 8,
-              borderRadius: BorderRadius.circular(4)),
-          const SizedBox(height: 8),
-          Align(alignment: Alignment.center, child: Text(
-              kmLeft > 0
-                  ? '${NumberFormat.decimalPattern('hu_HU').format(
-                  kmLeft)} km van hátra'
-                  : 'Csere esedékes!',
-              style: TextStyle(color: statusColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16))),
-        ])),
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                Icon(_getIconDataForService(title), color: statusColor,
+                    size: 20),
+                SizedBox(width: 10),
+                Text(title, style: const TextStyle(color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold))
+              ]),
+              const Divider(height: 24, color: Colors.white24),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                _buildInfoColumn('Előző csere',
+                    '${NumberFormat.decimalPattern('hu_HU').format(
+                        lastService.mileage)} km'),
+                _buildInfoColumn('Intervallum',
+                    '${NumberFormat.decimalPattern('hu_HU').format(
+                        interval)} km')
+              ]),
+              const SizedBox(height: 16),
+              LinearProgressIndicator(value: progress,
+                  backgroundColor: Colors.grey.shade800,
+                  color: statusColor,
+                  minHeight: 8,
+                  borderRadius: BorderRadius.circular(4)),
+              const SizedBox(height: 8),
+              Align(alignment: Alignment.center,
+                  child: Text(kmLeft > 0
+                      ? '${NumberFormat.decimalPattern('hu_HU').format(
+                      kmLeft)} km van hátra'
+                      : 'Csere esedékes!', style: TextStyle(color: statusColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16))),
+            ])),
       ),
     );
   }
