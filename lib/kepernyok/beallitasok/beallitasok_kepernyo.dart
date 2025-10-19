@@ -1,3 +1,7 @@
+import 'package:car_maintenance_app/alap/adatbazis/adatbazis_kezelo.dart';
+import 'package:car_maintenance_app/modellek/jarmu.dart';
+// ---
+
 import 'package:car_maintenance_app/szolgaltatasok/csv_szolgaltatas.dart';
 import 'package:car_maintenance_app/szolgaltatasok/pdf_szolgaltatas.dart';
 import 'package:car_maintenance_app/widgetek/kozos_menu_kartya.dart';
@@ -47,7 +51,9 @@ class _BeallitasokKepernyoState extends State<BeallitasokKepernyo> {
             backgroundColor: Colors.red));
       }
     }
-    setState(() => _isExporting = false);
+    if (mounted) {
+      setState(() => _isExporting = false);
+    }
   }
 
   Future<void> _handleCsvImport() async {
@@ -105,11 +111,127 @@ class _BeallitasokKepernyoState extends State<BeallitasokKepernyo> {
             backgroundColor: Colors.red));
       }
     }
-    setState(() => _isImporting = false);
+    if (mounted) {
+      setState(() => _isImporting = false);
+    }
   }
 
+  // ==========================================================
+  // ===     IDE VAN BEILLESZTVE A TELJES PDF LOGIKA      ===
+  // ==========================================================
   Future<void> _handlePdfExport() async {
-    // A te meglévő PDF export logikád
+    setState(() => _isExporting = true);
+
+    try {
+      // 1. Járművek lekérdezése az adatbázisból
+      final db = AdatbazisKezelo.instance;
+      final vehiclesMap = await db.getVehicles();
+      final vehicles = vehiclesMap.map((map) => Jarmu.fromMap(map)).toList();
+
+      if (!mounted) {
+        setState(() => _isExporting = false);
+        return;
+      }
+
+      if (vehicles.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Nincs jármű a parkban, nincs mit exportálni!'),
+            backgroundColor: Colors.redAccent));
+        setState(() => _isExporting = false);
+        return;
+      }
+
+      // 2. Jármű kiválasztása dialógusablakban
+      final Jarmu? selectedVehicle = await showDialog(
+        context: context,
+        builder: (context) =>
+            AlertDialog(
+              backgroundColor: const Color(0xFF1E1E1E),
+              title: const Text(
+                  'Válassz járművet', style: TextStyle(color: Colors.white)),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: vehicles.length,
+                  itemBuilder: (context, index) =>
+                      ListTile(
+                        title: Text(
+                            '${vehicles[index].make} ${vehicles[index].model}',
+                            style: const TextStyle(color: Colors.white)),
+                        onTap: () => Navigator.of(context).pop(vehicles[index]),
+                      ),
+                ),
+              ),
+            ),
+      );
+
+      if (selectedVehicle == null) {
+        if (mounted) setState(() => _isExporting = false);
+        return;
+      }
+
+      // 3. Művelet (Mentés/Megosztás) kiválasztása
+      final ExportAction? action = await showDialog(
+        context: context,
+        builder: (context) =>
+            AlertDialog(
+              backgroundColor: const Color(0xFF1E1E1E),
+              title: const Text(
+                  'Válassz műveletet', style: TextStyle(color: Colors.white)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.save_alt, color: Colors.white70),
+                    title: const Text('Mentés a telefonra',
+                        style: TextStyle(color: Colors.white)),
+                    onTap: () => Navigator.of(context).pop(ExportAction.save),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.share, color: Colors.white70),
+                    title: const Text(
+                        'Megosztás...', style: TextStyle(color: Colors.white)),
+                    onTap: () => Navigator.of(context).pop(ExportAction.share),
+                  ),
+                ],
+              ),
+            ),
+      );
+
+      if (action == null) {
+        if (mounted) setState(() => _isExporting = false);
+        return;
+      }
+
+      // 4. PDF generálás és exportálás hívása
+      final bool success = await _pdfSzolgaltatas.createAndExportPdf(
+          selectedVehicle, context, action);
+
+      // 5. Visszajelzés a felhasználónak
+      if (mounted && success && action == ExportAction.save) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('PDF sikeresen mentve a "Letöltések" mappába!'),
+            backgroundColor: Colors.green));
+      } else if (mounted && !success) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('A PDF generálás sikertelen. Részletek a konzolon.'),
+            backgroundColor: Colors.red));
+      }
+    } catch (e) {
+      // Itt kapjuk el az összes hibát, ami a folyamat során történik
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Hiba az exportálás során: $e'),
+              backgroundColor: Colors.red),
+        );
+      }
+    }
+
+    // Ez a blokk minden esetben lefut
+    if (mounted) {
+      setState(() => _isExporting = false);
+    }
   }
 
 
@@ -176,7 +298,7 @@ class _BeallitasokKepernyoState extends State<BeallitasokKepernyo> {
             color: Colors.orange.shade400,
             onTap: () {},
             trailing: Switch(
-              value: false,
+              value: false, // Inaktív alapból, amíg nincs kész
               onChanged: (bool value) {},
               activeColor: Colors.orange.shade400,
             ),
