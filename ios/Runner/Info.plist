@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Car Maintenance App</string>
+	<string>Olajfolt</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -45,9 +45,26 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	    <key>LSSupportsOpeningDocumentsInPlace</key>
-        <true/>
-        <key>UIFileSharingEnabled</key>
-        <true/>
+
+	<!-- ======================= ENGEDÉLYEK AZ APP MŰKÖDÉSÉHEZ ======================= -->
+
+	<!-- PDF/CSV Mentéshez és Importhoz (hozzáférés a "Fájlok" apphoz) -->
+	<key>UISupportsDocumentBrowser</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<key>UIFileSharingEnabled</key>
+    <true/>
+
+	<!-- Képválasztáshoz a galériából -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Az alkalmazásnak hozzáférésre van szüksége a galériához, hogy képet tudj választani a járművedhez.</string>
+
+	<!-- Értesítésekhez (ez a szöveg jelenik meg az engedélykérő ablakban) -->
+	<key>UNNotificationUsageDescription</key>
+	<string>Az alkalmazás értesítéseket küld a közelgő karbantartási eseményekről.</string>
+
+	<!-- ================================================================================= -->
+
 </dict>
 </plist>

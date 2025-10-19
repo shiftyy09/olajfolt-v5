@@ -1,4 +1,3 @@
-// lib/szolgaltatasok/ertesites_szolgaltatas.dart
 import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -10,15 +9,31 @@ class ErtesitesSzolgaltatas {
 
   Future<void> init() async {
     tz.initializeTimeZones();
+
     const AndroidInitializationSettings androidSettings =
     AndroidInitializationSettings('@drawable/ic_stat_notification');
+
+    // ==========================================================
+    // ===          FONTOS RÉSZ AZ IOS MŰKÖDÉSHEZ             ===
+    // ==========================================================
+    // Ez a blokk mondja meg a csomagnak, hogy iOS-en kérjen engedélyt
+    // a hang, a jelvény (piros pötty az ikonon) és a felugró értesítés megjelenítésére.
     const DarwinInitializationSettings darwinSettings =
-    DarwinInitializationSettings();
+    DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
+    // ==========================================================
+
     final InitializationSettings settings = InitializationSettings(
       android: androidSettings,
       iOS: darwinSettings,
       macOS: darwinSettings,
     );
+
+    // Itt történik a plugin inicializálása a fenti beállításokkal.
+    // iOS-en ez a hívás fogja feldobni az engedélykérő ablakot az app első indulásakor.
     await _notificationsPlugin.initialize(settings);
   }
 
@@ -28,10 +43,12 @@ class ErtesitesSzolgaltatas {
     required String body,
     required DateTime scheduledDate,
   }) async {
+    // Android specifikus, futásidejű engedélykérés a pontos riasztásokhoz
     if (Platform.isAndroid) {
       final androidImplementation = _notificationsPlugin
           .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>();
+
       if (androidImplementation != null) {
         final bool? canScheduleExactAlarms =
         await androidImplementation.canScheduleExactNotifications();
@@ -41,6 +58,7 @@ class ErtesitesSzolgaltatas {
       }
     }
 
+    // Az értesítés időzítése
     await _notificationsPlugin.zonedSchedule(
       id,
       title,
@@ -55,6 +73,10 @@ class ErtesitesSzolgaltatas {
           priority: Priority.high,
           icon: '@drawable/ic_stat_notification',
         ),
+        // iOS beállítások (egyelőre alap, de a hangot engedélyezi)
+        iOS: DarwinNotificationDetails(
+          presentSound: true,
+        ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
@@ -63,7 +85,6 @@ class ErtesitesSzolgaltatas {
     print('Értesítés időzítve: "$title", ekkor: $scheduledDate');
   }
 
-  // ÚJ FÜGGVÉNY: Hetente ismétlődő értesítés
   Future<void> scheduleWeeklyNotification({
     required int id,
     required String title,
@@ -73,24 +94,25 @@ class ErtesitesSzolgaltatas {
       id,
       title,
       body,
-      _nextInstanceOfTenAM(), // Időzítés minden héten reggel 10-re
+      _nextInstanceOfTenAM(),
       const NotificationDetails(
         android: AndroidNotificationDetails(
           'altalanos_emlekezteto_csatorna',
           'Általános Emlékeztetők',
           channelDescription: 'Hetente ismétlődő emlékeztetők.',
         ),
+        iOS: DarwinNotificationDetails(
+          presentSound: true,
+        ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
       UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents:
-      DateTimeComponents.dayOfWeekAndTime, // Ismétlés alapja
+      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
     );
     print('Heti értesítés időzítve: "$title"');
   }
 
-  // Segédfüggvény, ami kiszámolja a következő reggel 10 órát
   tz.TZDateTime _nextInstanceOfTenAM() {
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
     tz.TZDateTime scheduledDate =
@@ -98,15 +120,17 @@ class ErtesitesSzolgaltatas {
     if (scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
-    // Ez a logika most a következő napra időzít, de a matchDateTimeComponents miatt hetente fog ismétlődni.
     return scheduledDate;
   }
 
   Future<void> requestPermissions() async {
-    await _notificationsPlugin
-        .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestNotificationsPermission();
+    if (Platform.isAndroid) {
+      await _notificationsPlugin
+          .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+          ?.requestNotificationsPermission();
+    }
+    // iOS-en az init() végzi az engedélykérést, itt nincs külön teendő.
   }
 
   Future<void> cancelAllNotifications() async {

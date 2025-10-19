@@ -1,4 +1,3 @@
-// lib/kepernyok/indito/indito_kepernyo.dart
 import 'package:flutter/material.dart';
 import '../../alap/adatbazis/adatbazis_kezelo.dart';
 import '../fooldal/fooldal_kepernyo.dart';
