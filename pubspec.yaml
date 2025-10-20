@@ -10,11 +10,16 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # === EZ AZ ÚJ, HIÁNYZÓ BLOKK A MAGYAROSÍTÁSHOZ ===
+  flutter_localizations:
+    sdk: flutter
+  # ===============================================
+
   cupertino_icons: ^1.0.6
   sqflite: ^2.3.0
   path: ^1.8.3
-  shared_preferences: ^2.0.15
-  intl: ^0.19.0
+  shared_preferences: ^2.2.2 # Frissítettem egy stabilabb verzióra
+  intl: ^0.20.2
   http: ^1.2.1
   dropdown_search: ^5.0.6
   diacritic: ^0.1.5
@@ -28,8 +33,6 @@ dependencies:
   file_picker: ^8.0.0
   flutter_local_notifications: ^17.1.2
   timezone: ^0.9.3
-
-
 
 dev_dependencies:
   flutter_test:

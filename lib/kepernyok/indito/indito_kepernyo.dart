@@ -1,3 +1,4 @@
+// lib/kepernyok/indito/indito_kepernyo.dart
 import 'package:flutter/material.dart';
 import '../../alap/adatbazis/adatbazis_kezelo.dart';
 import '../fooldal/fooldal_kepernyo.dart';
@@ -33,24 +34,16 @@ class _InditoKepernyoState extends State<InditoKepernyo>
     );
   }
 
-  // ==========================================================
-  // ===          JAVÍTVA A MINIMÁLIS VÁRAKOZÁSI IDŐVEL       ===
-  // ==========================================================
   void _initializeApp() async {
-    // 1. Elindítjuk az adatbázis betöltését (ez a háttérben fut)
+    // Elindítjuk az adatbázis betöltését és egy minimális várakozási időt
     final dbFuture = AdatbazisKezelo.instance.database;
+    final minDelayFuture = Future.delayed(
+        const Duration(milliseconds: 2000)); // 2 másodperc
 
-    // 2. Létrehozunk egy másik jövőbeli eseményt, ami egy fix idő múlva teljesül.
-    // EZ A SOR GARANTÁLJA A MINIMÁLIS MEGJELENÉSI IDŐT.
-    // Állítsd be, amilyen hosszúra szeretnéd (pl. 2000ms = 2 másodperc).
-    final minDelayFuture = Future.delayed(const Duration(milliseconds: 2000));
-
-    // 3. A Future.wait megvárja, amíg MINDKÉT művelet befejeződik.
-    // - Ha a DB lassan tölt be (>2s), akkor a DB-re várunk.
-    // - Ha a DB gyorsan betölt (<2s), akkor is megvárjuk a 2 másodpercet.
+    // Megvárjuk, amíg mindkettő befejeződik
     await Future.wait([dbFuture, minDelayFuture]);
 
-    // 4. Navigáció a főoldalra, csak ha a képernyő még létezik a fán.
+    // Navigáció, csak ha a képernyő még létezik
     if (mounted) {
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
@@ -64,8 +57,6 @@ class _InditoKepernyoState extends State<InditoKepernyo>
     }
   }
 
-  // ==========================================================
-
   @override
   void dispose() {
     _animationController.dispose();
@@ -77,28 +68,20 @@ class _InditoKepernyoState extends State<InditoKepernyo>
     return Scaffold(
       backgroundColor: Colors.black,
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            FadeTransition(
-              opacity: _fadeAnimation,
-              child: Image.asset(
-                'assets/images/olajfolt.png',
-                width: 250,
-                fit: BoxFit.contain,
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Szerviz-napló',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 255, 164, 0),
-              ),
-            ),
-          ],
+        // =======================================================
+        // ===            ITT TÖRTÉNT A VÁLTOZTATÁS           ===
+        // =======================================================
+        // A Column-t kivettem, mert már csak egyetlen widget, a kép van benne.
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: Image.asset(
+            'assets/images/olajfolt.png',
+            width: 250,
+            fit: BoxFit.contain,
+          ),
         ),
+        // A Text("Szerviz-napló") és a SizedBox innen lett eltávolítva.
+        // =======================================================
       ),
     );
   }

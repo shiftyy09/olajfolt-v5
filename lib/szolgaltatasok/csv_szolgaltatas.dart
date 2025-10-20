@@ -5,23 +5,15 @@ import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 
-// Enum az importálás eredményének jelzésére a felhasználói felület felé.
 enum ImportResult { success, error, noFileSelected, invalidFormat, emptyFile }
 
 class CsvSzolgaltatas {
-  /// Az összes jármű- és szervizadatot egyetlen CSV fájlba exportálja.
   Future<String?> exportAllDataToCsv() async {
     if (Platform.isAndroid) {
-      final deviceInfo = await DeviceInfoPlugin().androidInfo;
-      if (deviceInfo.version.sdkInt <= 28) {
-        final status = await Permission.storage.request();
-        if (status.isDenied || status.isPermanentlyDenied) {
-          print("Tárhely hozzáférés elutasítva.");
-          openAppSettings();
-          return "permission_denied";
-        }
+      var status = await Permission.storage.request();
+      if (!status.isGranted) {
+        return "permission_denied";
       }
     }
 
@@ -42,7 +34,6 @@ class CsvSzolgaltatas {
       }
       vehicleCsv = const ListToCsvConverter().convert(vehicleRows);
     }
-
     String serviceCsv = "";
     if (services.isNotEmpty) {
       List<List<dynamic>> serviceRows = [];
@@ -52,17 +43,23 @@ class CsvSzolgaltatas {
       }
       serviceCsv = const ListToCsvConverter().convert(serviceRows);
     }
-
     String combinedCsv = "---VEHICLES---\n$vehicleCsv\n---SERVICES---\n$serviceCsv";
 
     try {
-      final directory = await getDownloadsDirectory();
-      if (directory == null) return null;
+      final directory = await getExternalStoragePublicDirectory(
+          StorageDirectory.downloads);
+
+      if (directory == null) {
+        print("Nem sikerült elérni a Letöltések mappát.");
+        return null;
+      }
 
       final String formattedDate = DateFormat('yyyy-MM-dd_HH-mm').format(
           DateTime.now());
-      final path = "${directory.path}/olajfolt_mentes_$formattedDate.csv";
-      final file = File(path);
+      final String fileName = "olajfolt_mentes_$formattedDate.csv";
+      final String path = "${directory.path}/$fileName";
+      final File file = File(path);
+
       await file.writeAsString(combinedCsv);
       print("Sikeres exportálás ide: $path");
       return path;
@@ -72,45 +69,45 @@ class CsvSzolgaltatas {
     }
   }
 
-  /// Elindítja az adatimportálási folyamatot.
+  Future<Directory?> getExternalStoragePublicDirectory(
+      StorageDirectory type) async {
+    if (!Platform.isAndroid) {
+      // iOS-en vagy más platformon más logikát használunk
+      return getApplicationDocumentsDirectory();
+    }
+    // Android specifikus implementáció
+    final List<Directory> dirs = (await getExternalStorageDirectories(
+        type: type))!;
+    if (dirs.isNotEmpty) {
+      return dirs.first;
+    }
+    return null;
+  }
+
+  // Az importDataFromCsv függvény változatlan
   Future<ImportResult> importDataFromCsv() async {
     final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['csv'],
-    );
-
+        type: FileType.custom, allowedExtensions: ['csv']);
     if (result == null || result.files.single.path == null) {
-      print("Nincs fájl kiválasztva.");
       return ImportResult.noFileSelected;
     }
-
     File file = File(result.files.single.path!);
-
     try {
       final String content = await file.readAsString();
-
       if (content
           .trim()
           .isEmpty) {
         return ImportResult.emptyFile;
       }
-
       if (!content.contains('---VEHICLES---') ||
           !content.contains('---SERVICES---')) {
-        print("Érvénytelen CSV formátum: hiányoznak a szeparátorok.");
         return ImportResult.invalidFormat;
       }
-
       final parts = content.split('---SERVICES---');
       final vehiclePart = parts[0].replaceFirst('---VEHICLES---', '').trim();
       final servicePart = parts.length > 1 ? parts[1].trim() : '';
-
       final db = AdatbazisKezelo.instance;
-
       await db.clearAllData();
-      print("Adatbázis törölve importálás előtt.");
-
-      // Járművek importálása
       if (vehiclePart.isNotEmpty) {
         List<List<dynamic>> vehicleRows = const CsvToListConverter(
             shouldParseNumbers: false).convert(vehiclePart);
@@ -121,17 +118,12 @@ class CsvSzolgaltatas {
           for (int i = 1; i < vehicleRows.length; i++) {
             Map<String, dynamic> rowMap = Map.fromIterables(
                 headers, vehicleRows[i]);
-
             rowMap['id'] = int.tryParse(rowMap['id'].toString());
             rowMap['year'] = int.tryParse(rowMap['year'].toString());
-
             await db.insert('vehicles', rowMap);
           }
-          print("${vehicleRows.length - 1} jármű importálva.");
         }
       }
-
-      // Szervizek importálása
       if (servicePart.isNotEmpty) {
         List<List<dynamic>> serviceRows = const CsvToListConverter(
             shouldParseNumbers: false).convert(servicePart);
@@ -142,19 +134,14 @@ class CsvSzolgaltatas {
           for (int i = 1; i < serviceRows.length; i++) {
             Map<String, dynamic> rowMap = Map.fromIterables(
                 headers, serviceRows[i]);
-
             rowMap['id'] = int.tryParse(rowMap['id'].toString());
             rowMap['vehicleId'] = int.tryParse(rowMap['vehicleId'].toString());
             rowMap['mileage'] = int.tryParse(rowMap['mileage'].toString());
-            rowMap['cost'] =
-                num.tryParse(rowMap['cost'].toString()); // .toInt() eltávolítva
-
+            rowMap['cost'] = num.tryParse(rowMap['cost'].toString());
             await db.insert('services', rowMap);
           }
-          print("${serviceRows.length - 1} szervizbejegyzés importálva.");
         }
       }
-
       return ImportResult.success;
     } catch (e) {
       print("Hiba a CSV importálás során: $e");

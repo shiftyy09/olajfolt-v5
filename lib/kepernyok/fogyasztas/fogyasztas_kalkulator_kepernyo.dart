@@ -1,8 +1,10 @@
+// lib/kepernyok/fogyasztas/fogyasztas_kalkulator_kepernyo.dart
 import 'package:car_maintenance_app/alap/adatbazis/adatbazis_kezelo.dart';
 import 'package:car_maintenance_app/modellek/jarmu.dart';
 import 'package:car_maintenance_app/modellek/karbantartas_bejegyzes.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:car_maintenance_app/szolgaltatasok/uzemanyag_ar_szolgaltatas.dart';
 
 class FogyasztasKalkulatorKepernyo extends StatefulWidget {
   final Jarmu vehicle;
@@ -26,6 +28,8 @@ class _FogyasztasKalkulatorKepernyoState
   double _monthlyLiters = 0;
   bool _isLoading = true;
 
+  final UzemanyagArSzolgaltatas _arSzolgaltatas = UzemanyagArSzolgaltatas();
+
   @override
   void initState() {
     super.initState();
@@ -34,9 +38,15 @@ class _FogyasztasKalkulatorKepernyoState
     _loadMonthlyStats();
   }
 
-  // ===================================
-  //  ÚJ FÜGGVÉNY: INFORMÁCIÓS ABLAK
-  // ===================================
+  @override
+  void dispose() {
+    _literController.dispose();
+    _priceController.dispose();
+    _totalCostController.dispose();
+    _odometerController.dispose();
+    super.dispose();
+  }
+
   void _showInfoDialog() {
     showDialog(
       context: context,
@@ -45,13 +55,11 @@ class _FogyasztasKalkulatorKepernyoState
             backgroundColor: const Color(0xFF1E1E1E),
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15)),
-            title: const Row(
-              children: [
-                Icon(Icons.info_outline, color: Colors.cyanAccent),
-                SizedBox(width: 10),
-                Text('Hogyan működik?', style: TextStyle(color: Colors.white)),
-              ],
-            ),
+            title: const Row(children: [
+              Icon(Icons.info_outline, color: Colors.cyanAccent),
+              SizedBox(width: 10),
+              Text('Hogyan működik?', style: TextStyle(color: Colors.white)),
+            ]),
             content: const SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -62,8 +70,9 @@ class _FogyasztasKalkulatorKepernyoState
                     style: TextStyle(color: Colors.white70),
                   ),
                   SizedBox(height: 15),
-                  Text('Működése:', style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold)),
+                  Text('Működése:',
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold)),
                   SizedBox(height: 8),
                   Text(
                       '1. Töltsd ki a tankolt mennyiséget, az egységárat és a km-óra állását.',
@@ -86,8 +95,8 @@ class _FogyasztasKalkulatorKepernyoState
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text(
-                    'Értem', style: TextStyle(color: Colors.cyanAccent)),
+                child:
+                const Text('Értem', style: TextStyle(color: Colors.cyanAccent)),
               ),
             ],
           ),
@@ -99,10 +108,8 @@ class _FogyasztasKalkulatorKepernyoState
     final db = AdatbazisKezelo.instance;
     final allServices = await db.getServicesForVehicle(widget.vehicle.id!);
     final now = DateTime.now();
-
     double cost = 0;
     double liters = 0;
-
     for (var serviceMap in allServices) {
       final service = Szerviz.fromMap(serviceMap);
       if (service.date.month == now.month &&
@@ -117,7 +124,6 @@ class _FogyasztasKalkulatorKepernyoState
         liters += double.tryParse(literString) ?? 0;
       }
     }
-
     setState(() {
       _monthlyCost = cost;
       _monthlyLiters = liters;
@@ -141,7 +147,6 @@ class _FogyasztasKalkulatorKepernyoState
   Future<void> _saveFueling() async {
     if (_formKey.currentState!.validate()) {
       FocusScope.of(context).unfocus();
-
       final liters =
           double.tryParse(_literController.text.replaceAll(',', '.')) ?? 0;
       final cost =
@@ -149,7 +154,6 @@ class _FogyasztasKalkulatorKepernyoState
           .toInt();
       final odometer =
           int.tryParse(_odometerController.text.replaceAll(',', '.')) ?? 0;
-
       final newFueling = Szerviz(
         vehicleId: widget.vehicle.id!,
         date: DateTime.now(),
@@ -157,15 +161,12 @@ class _FogyasztasKalkulatorKepernyoState
         description: 'Tankolás ($liters liter)',
         cost: cost,
       );
-
       final db = AdatbazisKezelo.instance;
       await db.insert('services', newFueling.toMap());
-
       _literController.clear();
       _priceController.clear();
       _odometerController.clear();
       _loadMonthlyStats();
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -178,15 +179,6 @@ class _FogyasztasKalkulatorKepernyoState
   }
 
   @override
-  void dispose() {
-    _literController.dispose();
-    _priceController.dispose();
-    _totalCostController.dispose();
-    _odometerController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
@@ -194,9 +186,6 @@ class _FogyasztasKalkulatorKepernyoState
         title: Text('${widget.vehicle.make} - Tankolás'),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        // ===================================
-        //  KIEGÉSZÍTÉS: INFO GOMB AZ APPBAR-BAN
-        // ===================================
         actions: [
           IconButton(
             icon: const Icon(Icons.info_outline, color: Colors.cyanAccent),
@@ -205,20 +194,28 @@ class _FogyasztasKalkulatorKepernyoState
           ),
         ],
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-          children: [
-            _buildInputCard(),
-            const SizedBox(height: 20),
-            _buildSaveButton(),
-            const SizedBox(height: 30),
-            const Divider(color: Colors.white24),
-            const SizedBox(height: 10),
-            _buildStatsCard(),
-          ],
-        ),
+      body: Column(
+        children: [
+          Expanded(
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+                children: [
+                  _buildInputCard(),
+                  const SizedBox(height: 20),
+                  _buildSaveButton(),
+                  const SizedBox(height: 30),
+                  const Divider(color: Colors.white24),
+                  const SizedBox(height: 10),
+                  _buildStatsCard(),
+                ],
+              ),
+            ),
+          ),
+          _buildFuelPriceBox(),
+        ],
       ),
     );
   }
@@ -298,7 +295,6 @@ class _FogyasztasKalkulatorKepernyoState
   Widget _buildStatsCard() {
     final monthName =
     DateFormat.MMMM('hu_HU').format(DateTime.now()).toUpperCase();
-
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -363,17 +359,15 @@ class _FogyasztasKalkulatorKepernyoState
     );
   }
 
-  Widget _buildTextFormField({
-    required TextEditingController controller,
+  Widget _buildTextFormField({required TextEditingController controller,
     required String labelText,
     required IconData icon,
-    bool readOnly = false,
-  }) {
+    bool readOnly = false}) {
     return TextFormField(
       controller: controller,
       readOnly: readOnly,
-      style: TextStyle(
-          color: readOnly ? Colors.white70 : Colors.white, fontSize: 16),
+      style:
+      TextStyle(color: readOnly ? Colors.white70 : Colors.white, fontSize: 16),
       decoration: InputDecoration(
         labelText: labelText,
         labelStyle: const TextStyle(color: Colors.white70),
@@ -400,6 +394,72 @@ class _FogyasztasKalkulatorKepernyoState
         }
         return null;
       },
+    );
+  }
+
+  Widget _buildFuelPriceBox() {
+    return FutureBuilder<UzemanyagArak?>(
+      future: _arSzolgaltatas.fetchFuelPrices(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Padding(
+            padding: EdgeInsets.all(16.0),
+            child:
+            Center(child: CircularProgressIndicator(color: Colors.amber)),
+          );
+        }
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
+          return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16.0),
+            color: Colors.red.withOpacity(0.2),
+            child: const Text(
+              'Az üzemanyagárak jelenleg nem elérhetők.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white70),
+            ),
+          );
+        }
+        final arak = snapshot.data!;
+        return Container(
+          width: double.infinity,
+          padding:
+          const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1E1E),
+            border: Border(
+                top: BorderSide(
+                    color: Colors.amber.withOpacity(0.5), width: 1.5)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _priceColumn('95-ös Benzin', arak.benzinAr),
+              _priceColumn('Gázolaj', arak.gazolajAr),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _priceColumn(String label, double price) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white70, fontSize: 14),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '${price.toStringAsFixed(0)} Ft',
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 }
