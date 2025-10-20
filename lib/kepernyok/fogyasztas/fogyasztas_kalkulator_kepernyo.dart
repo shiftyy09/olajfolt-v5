@@ -1,4 +1,3 @@
-// lib/kepernyok/fogyasztas/fogyasztas_kalkulator_kepernyo.dart
 import 'package:car_maintenance_app/alap/adatbazis/adatbazis_kezelo.dart';
 import 'package:car_maintenance_app/modellek/jarmu.dart';
 import 'package:car_maintenance_app/modellek/karbantartas_bejegyzes.dart';
@@ -28,7 +27,10 @@ class _FogyasztasKalkulatorKepernyoState
   double _monthlyLiters = 0;
   bool _isLoading = true;
 
+  // === JAVÍTÁS KEZDETE ===
   final UzemanyagArSzolgaltatas _arSzolgaltatas = UzemanyagArSzolgaltatas();
+  late Future<UzemanyagArak?> _fuelPricesFuture; // Új állapotváltozó
+  // =====================
 
   @override
   void initState() {
@@ -36,6 +38,10 @@ class _FogyasztasKalkulatorKepernyoState
     _literController.addListener(_calculateTotal);
     _priceController.addListener(_calculateTotal);
     _loadMonthlyStats();
+
+    // === JAVÍTÁS: A lekérdezést itt indítjuk, csak egyszer ===
+    _fuelPricesFuture = _arSzolgaltatas.fetchFuelPrices();
+    // =========================================================
   }
 
   @override
@@ -399,7 +405,7 @@ class _FogyasztasKalkulatorKepernyoState
 
   Widget _buildFuelPriceBox() {
     return FutureBuilder<UzemanyagArak?>(
-      future: _arSzolgaltatas.fetchFuelPrices(),
+      future: _fuelPricesFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Padding(
