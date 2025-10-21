@@ -1,49 +1,56 @@
+# A munkafolyamat neve, ami megjelenik a GitHub Actions fülön
 name: Build Olajfolt IPA
 
+# Mikor fusson le a build?
 on:
+  # Ha valaki a 'main' ágra push-ol kódot
   push:
     branches: [ main ]
+  # Vagy ha kézzel elindítják a GitHub felületén
   workflow_dispatch:
 
 jobs:
   build-ios:
-    runs-on: macos-latest
+    # A build-hez egy macOS virtuális gépet használunk
+    runs-on: macos-latest # A macos-15 elavult, a macos-latest mindig a legfrissebbet használja
 
     steps:
+      # 1. lépés: Letölti a kódodat a repozitóriumból
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2. lépés: Beállítja az Xcode környezetet
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: 'latest-stable'
+          xcode-version: 'latest-stable' # Ajánlott a 'latest-stable' használata
 
+      # 3. lépés: Beállítja a Flutter környezetet
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.2' # Stabil, kompatibilis verzió
+          flutter-version: '3.22.2' # Módosítsd a saját Flutter verziódra, ha szükséges!
           channel: 'stable'
-          cache: true
+          cache: true # Gyorsítja a buildet a függőségek gyorsítótárazásával
 
+      # 4. lépés: Letölti a projekt függőségeit
       - name: Get Flutter dependencies
         run: flutter pub get
 
-      # === JAVÍTOTT, MEGBÍZHATÓ BUILD FOLYAMAT ===
-      # Itt már nem a 'flutter build', hanem az 'xcodebuild' parancsokat használjuk.
+      # 5. lépés: Létrehozza az ALÁÍRATLAN iOS alkalmazást (.app mappa)
+      - name: Build unsigned iOS app
+        run: flutter build ios --release --no-codesign
 
-      - name: Build Xcode project archive
+      # 6. lépés: Manuálisan létrehozza a telepíthető .ipa fájlt
+      - name: Create Payload folder and IPA
         run: |
-          cd ios
-          xcodebuild archive -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos -archivePath ../build/ios/archive/Runner.xcarchive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
+          mkdir -p Payload
+          cp -r build/ios/iphoneos/Runner.app Payload/
+          zip -r Olajfolt.ipa Payload/
 
-      - name: Export unsigned IPA
-        run: |
-          xcodebuild -exportArchive -archivePath build/ios/archive/Runner.xcarchive -exportPath build/ios/ipa -exportOptionsPlist ios/exportOptions.plist
-
-      # Az 'upload-artifact' lépést frissítjük az új, helyes elérési úttal.
+      # 7. lépés: Feltölti a kész .ipa fájlt a build "Artifacts" részébe
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Olajfolt-IPA
-          # A *.ipa azt jelenti, hogy az összes .ipa kiterjesztésű fájlt feltölti.
-          path: build/ios/ipa/*.ipa
+          name: Olajfolt-IPA # Az artifact neve
+          path: Olajfolt.ipa # A feltöltendő fájl neve
