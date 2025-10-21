@@ -16,8 +16,8 @@ import '../alap/adatbazis/adatbazis_kezelo.dart';
 enum ExportAction { save, share }
 
 class PdfSzolgaltatas {
-  Future<bool> createAndExportPdf(Jarmu vehicle, BuildContext context,
-      ExportAction action) async {
+  Future<bool> createAndExportPdf(
+      Jarmu vehicle, BuildContext context, ExportAction action) async {
     final pdf = pw.Document();
     final bytes = await _buildPdf(pdf, vehicle);
     if (bytes == null) return false;
@@ -35,9 +35,8 @@ class PdfSzolgaltatas {
   Future<Uint8List?> _buildPdf(pw.Document pdf, Jarmu vehicle) async {
     final db = AdatbazisKezelo.instance;
     final serviceRecordsMap = await db.getServicesForVehicle(vehicle.id!);
-    final serviceRecords = serviceRecordsMap
-        .map((map) => Szerviz.fromMap(map))
-        .toList();
+    final serviceRecords =
+        serviceRecordsMap.map((map) => Szerviz.fromMap(map)).toList();
 
     final fontData = await rootBundle.load("assets/fonts/Roboto-Regular.ttf");
     final boldFontData = await rootBundle.load("assets/fonts/Roboto-Bold.ttf");
@@ -45,7 +44,8 @@ class PdfSzolgaltatas {
     final boldTtf = pw.Font.ttf(boldFontData);
 
     final appLogoImage = pw.MemoryImage(
-        (await rootBundle.load('assets/images/olajfoltiras.png')).buffer
+        (await rootBundle.load('assets/images/olajfoltiras.png'))
+            .buffer
             .asUint8List());
     final vehicleBrandLogo = await _getVehicleBrandLogo(vehicle.make);
 
@@ -101,8 +101,8 @@ class PdfSzolgaltatas {
     }
   }
 
-  Future<bool> _shareFile(Uint8List bytes, String fileName,
-      BuildContext context) async {
+  Future<bool> _shareFile(
+      Uint8List bytes, String fileName, BuildContext context) async {
     try {
       final tempDir = await getTemporaryDirectory();
       final tempFile = File('${tempDir.path}/$fileName');
@@ -126,8 +126,8 @@ class PdfSzolgaltatas {
     try {
       final domain = brand.toLowerCase().replaceAll(' ', '') + '.com';
       final url = Uri.parse('https://logo.clearbit.com/$domain');
-      final response =
-      await http.get(url, headers: {'User-Agent': 'car_maintenance_app/1.0'});
+      final response = await http
+          .get(url, headers: {'User-Agent': 'car_maintenance_app/1.0'});
       if (response.statusCode == 200) {
         return pw.MemoryImage(response.bodyBytes);
       }
@@ -147,8 +147,8 @@ class PdfSzolgaltatas {
     );
   }
 
-  pw.Widget _buildVehicleInfoSection(Jarmu vehicle, pw.MemoryImage? brandLogo,
-      PdfColor accentColor) {
+  pw.Widget _buildVehicleInfoSection(
+      Jarmu vehicle, pw.MemoryImage? brandLogo, PdfColor accentColor) {
     return pw.Container(
       padding: const pw.EdgeInsets.all(15),
       decoration: pw.BoxDecoration(
@@ -165,8 +165,8 @@ class PdfSzolgaltatas {
               children: [
                 pw.Text(
                   '${vehicle.make} ${vehicle.model}',
-                  style:
-                  pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 22),
+                  style: pw.TextStyle(
+                      fontWeight: pw.FontWeight.bold, fontSize: 22),
                 ),
                 pw.SizedBox(height: 5),
                 pw.Text(
@@ -208,8 +208,8 @@ class PdfSzolgaltatas {
     return pw.TableRow(children: [
       pw.Padding(
         padding: const pw.EdgeInsets.all(2),
-        child: pw.Text(
-            label, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+        child:
+            pw.Text(label, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
       ),
       pw.Padding(
         padding: const pw.EdgeInsets.all(2),
@@ -235,8 +235,8 @@ class PdfSzolgaltatas {
     );
   }
 
-  pw.Widget _buildServiceHistoryTable(List<Szerviz> records,
-      PdfColor accentColor) {
+  pw.Widget _buildServiceHistoryTable(
+      List<Szerviz> records, PdfColor accentColor) {
     if (records.isEmpty) {
       return pw.Text('Nincsenek rögzített szervizesemények.');
     }
@@ -254,8 +254,8 @@ class PdfSzolgaltatas {
       headers: headers,
       data: data,
       border: null,
-      headerStyle: pw.TextStyle(
-          fontWeight: pw.FontWeight.bold, color: PdfColors.white),
+      headerStyle:
+          pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white),
       headerDecoration: pw.BoxDecoration(color: accentColor),
       rowDecoration: const pw.BoxDecoration(
           border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey200))),
@@ -274,8 +274,8 @@ class PdfSzolgaltatas {
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
-        pw.Text('Generálva: ${DateFormat('yyyy.MM.dd HH:mm').format(
-            DateTime.now())}',
+        pw.Text(
+            'Generálva: ${DateFormat('yyyy.MM.dd HH:mm').format(DateTime.now())}',
             style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey)),
         pw.Text('Olajfolt Szerviz-napló App v1.0',
             style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey)),

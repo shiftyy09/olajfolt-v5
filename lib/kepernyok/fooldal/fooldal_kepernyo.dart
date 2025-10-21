@@ -35,8 +35,8 @@ class _FooldalKepernyoState extends State<FooldalKepernyo>
 
     _slideAnimation =
         Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
-          CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
-        );
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
 
     _animationController.forward();
   }
@@ -72,9 +72,8 @@ class _FooldalKepernyoState extends State<FooldalKepernyo>
       builder: (context) {
         return AlertDialog(
           backgroundColor: const Color(0xFF1E1E1E),
-          title:
-          const Text(
-              'Válassz járművet!', style: TextStyle(color: Colors.white)),
+          title: const Text('Válassz járművet!',
+              style: TextStyle(color: Colors.white)),
           content: SizedBox(
             width: double.maxFinite,
             child: ListView.builder(
@@ -111,8 +110,8 @@ class _FooldalKepernyoState extends State<FooldalKepernyo>
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0, vertical: 20.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: Image.asset(
                 'assets/images/olajfoltiras.png',
                 height: 50,

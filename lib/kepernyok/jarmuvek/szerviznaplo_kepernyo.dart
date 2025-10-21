@@ -33,66 +33,62 @@ class _SzerviznaploKepernyoState extends State<SzerviznaploKepernyo> {
     });
   }
 
-  
   void _showInfoDialog() {
     showDialog(
       context: context,
-      builder: (context) =>
-          AlertDialog(
-            backgroundColor: const Color(0xFF1E1E1E),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15)),
-            title: const Row(
-              children: [
-                Icon(Icons.info_outline, color: Colors.cyanAccent),
-                SizedBox(width: 10),
-                Text('Hogyan működik?', style: TextStyle(color: Colors.white)),
-              ],
-            ),
-            content: const SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Ez a képernyő a járműved összes rögzített eseményét mutatja, a legújábbal elöl.',
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                  SizedBox(height: 15),
-                  Text(
-                    'Itt láthatod:',
-                    style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 8),
-                  Text('• A manuálisan felvett szervizeket (narancs).',
-                      style: TextStyle(color: Colors.white70)),
-                  Text('• A tankolásokat (zöld).',
-                      style: TextStyle(color: Colors.white70)),
-                  Text('• Az automatikus emlékeztetőket (piros).',
-                      style: TextStyle(color: Colors.white70)),
-                ],
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E1E),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: const Row(
+          children: [
+            Icon(Icons.info_outline, color: Colors.cyanAccent),
+            SizedBox(width: 10),
+            Text('Hogyan működik?', style: TextStyle(color: Colors.white)),
+          ],
+        ),
+        content: const SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Ez a képernyő a járműved összes rögzített eseményét mutatja, a legújábbal elöl.',
+                style: TextStyle(color: Colors.white70),
               ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text(
-                    'Értem', style: TextStyle(color: Colors.cyanAccent)),
+              SizedBox(height: 15),
+              Text(
+                'Itt láthatod:',
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
+              SizedBox(height: 8),
+              Text('• A manuálisan felvett szervizeket (narancs).',
+                  style: TextStyle(color: Colors.white70)),
+              Text('• A tankolásokat (zöld).',
+                  style: TextStyle(color: Colors.white70)),
+              Text('• Az automatikus emlékeztetőket (piros).',
+                  style: TextStyle(color: Colors.white70)),
             ],
           ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child:
+                const Text('Értem', style: TextStyle(color: Colors.cyanAccent)),
+          ),
+        ],
+      ),
     );
   }
 
-
   Future<void> _addOrEditService({Szerviz? record}) async {
-    final descriptionController = TextEditingController(
-        text: record?.description);
+    final descriptionController =
+        TextEditingController(text: record?.description);
     final costController = TextEditingController(
         text: record?.cost.toString() == '0' ? '' : record?.cost.toString());
-    final mileageController = TextEditingController(
-        text: record?.mileage.toString());
+    final mileageController =
+        TextEditingController(text: record?.mileage.toString());
     DateTime selectedDate = record?.date ?? DateTime.now();
 
     final bool? success = await showDialog<bool>(
@@ -112,9 +108,8 @@ class _SzerviznaploKepernyoState extends State<SzerviznaploKepernyo> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _buildTextField(
-                        descriptionController, 'Leírás (pl. Olajcsere)',
-                        Icons.description),
+                    _buildTextField(descriptionController,
+                        'Leírás (pl. Olajcsere)', Icons.description),
                     const SizedBox(height: 16),
                     _buildTextField(costController, 'Költség (Ft)', Icons.paid,
                         keyboardType: TextInputType.number),
@@ -125,8 +120,7 @@ class _SzerviznaploKepernyoState extends State<SzerviznaploKepernyo> {
                     const SizedBox(height: 16),
                     _buildDatePicker(
                       selectedDate,
-                          (newDate) =>
-                          setDialogState(() => selectedDate = newDate),
+                      (newDate) => setDialogState(() => selectedDate = newDate),
                     ),
                   ],
                 ),
@@ -134,8 +128,8 @@ class _SzerviznaploKepernyoState extends State<SzerviznaploKepernyo> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text(
-                      'Mégse', style: TextStyle(color: Colors.white70)),
+                  child: const Text('Mégse',
+                      style: TextStyle(color: Colors.white70)),
                 ),
                 ElevatedButton(
                   onPressed: () async {
@@ -157,10 +151,11 @@ class _SzerviznaploKepernyoState extends State<SzerviznaploKepernyo> {
                     }
                     Navigator.of(context).pop(true);
                   },
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange),
-                  child: const Text('Mentés', style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold)),
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                  child: const Text('Mentés',
+                      style: TextStyle(
+                          color: Colors.black, fontWeight: FontWeight.bold)),
                 ),
               ],
             );
@@ -175,8 +170,9 @@ class _SzerviznaploKepernyoState extends State<SzerviznaploKepernyo> {
   }
 
   // Dialógus ablakhoz tartozó segéd-widgetek
-  Widget _buildTextField(TextEditingController controller, String label,
-      IconData icon, {TextInputType keyboardType = TextInputType.text}) {
+  Widget _buildTextField(
+      TextEditingController controller, String label, IconData icon,
+      {TextInputType keyboardType = TextInputType.text}) {
     return TextFormField(
       controller: controller,
       style: const TextStyle(color: Colors.white),
@@ -186,16 +182,17 @@ class _SzerviznaploKepernyoState extends State<SzerviznaploKepernyo> {
         prefixIcon: Icon(icon, color: Colors.orange, size: 20),
         filled: true,
         fillColor: const Color(0xFF2A2A2A),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none),
         focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: Colors.orange, width: 2)),
       ),
       keyboardType: keyboardType,
-      inputFormatters: keyboardType == TextInputType.number ? [
-        FilteringTextInputFormatter.digitsOnly
-      ] : [],
+      inputFormatters: keyboardType == TextInputType.number
+          ? [FilteringTextInputFormatter.digitsOnly]
+          : [],
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Kérjük, töltse ki a mezőt!';
@@ -220,15 +217,16 @@ class _SzerviznaploKepernyoState extends State<SzerviznaploKepernyo> {
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
-        decoration: BoxDecoration(color: const Color(0xFF2A2A2A),
+        decoration: BoxDecoration(
+            color: const Color(0xFF2A2A2A),
             borderRadius: BorderRadius.circular(12)),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
               children: [
-                const Icon(
-                    Icons.calendar_today, color: Colors.orange, size: 20),
+                const Icon(Icons.calendar_today,
+                    color: Colors.orange, size: 20),
                 const SizedBox(width: 12),
                 Text(DateFormat('yyyy. MM. dd.').format(date),
                     style: const TextStyle(color: Colors.white, fontSize: 16)),
@@ -240,7 +238,6 @@ class _SzerviznaploKepernyoState extends State<SzerviznaploKepernyo> {
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -265,8 +262,9 @@ class _SzerviznaploKepernyoState extends State<SzerviznaploKepernyo> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Hiba történt: ${snapshot.error}',
-                style: const TextStyle(color: Colors.red)));
+            return Center(
+                child: Text('Hiba történt: ${snapshot.error}',
+                    style: const TextStyle(color: Colors.red)));
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(
@@ -296,7 +294,6 @@ class _SzerviznaploKepernyoState extends State<SzerviznaploKepernyo> {
     );
   }
 
-  
   Widget _buildServiceCard(Szerviz record) {
     // Színkódolás a bejegyzés típusa alapján
     final String desc = record.description.toLowerCase();
@@ -357,14 +354,12 @@ class _SzerviznaploKepernyoState extends State<SzerviznaploKepernyo> {
                   ),
                   _buildInfoColumn(
                     Icons.speed,
-                    '${NumberFormat.decimalPattern('hu_HU').format(
-                        record.mileage)} km',
+                    '${NumberFormat.decimalPattern('hu_HU').format(record.mileage)} km',
                   ),
                   if (record.cost > 0)
                     _buildInfoColumn(
                       Icons.paid,
-                      '${NumberFormat.decimalPattern('hu_HU').format(
-                          record.cost)} Ft',
+                      '${NumberFormat.decimalPattern('hu_HU').format(record.cost)} Ft',
                     ),
                 ],
               ),

@@ -18,14 +18,10 @@ class AdatbazisKezelo {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
-    
-    
-    
     return await openDatabase(path,
         version: 6, // <<<--- NÖVELD MEG A VERZIÓSZÁMOT!
         onCreate: _createAllTables,
         onUpgrade: _onUpgrade);
-    
   }
 
   Future<void> _createAllTables(Database db, int version) async {
@@ -68,7 +64,6 @@ class AdatbazisKezelo {
         "Adatbázis séma frissítve $oldVersion verzióról $newVersion verzióra.");
   }
 
-  
   // ... (A többi függvényed, mint pl. getVehicles, insert, stb. itt változatlan marad)
   Future<int> insert(String table, Map<String, dynamic> row) async {
     final db = await database;
@@ -112,8 +107,8 @@ class AdatbazisKezelo {
 
   Future<int> deleteServicesForVehicle(int vehicleId) async {
     final db = await database;
-    return await db.delete(
-        'services', where: 'vehicleId = ?', whereArgs: [vehicleId]);
+    return await db
+        .delete('services', where: 'vehicleId = ?', whereArgs: [vehicleId]);
   }
 
   Future<void> clearAllData() async {

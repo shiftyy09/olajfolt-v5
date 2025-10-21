@@ -43,9 +43,17 @@ class _JarmuHozzaadasaState extends State<JarmuHozzaadasa> {
 
   final List<String> _dateBasedServiceTypes = ['Műszaki vizsga'];
   final List<String> _kmBasedServiceTypes = [
-    'Olajcsere', 'Légszűrő', 'Pollenszűrő', 'Gyújtógyertya', 'Üzemanyagszűrő',
-    'Vezérlés (Szíj)', 'Fékbetét (első)', 'Fékbetét (hátsó)', 'Fékfolyadék',
-    'Hűtőfolyadék', 'Kuplung'
+    'Olajcsere',
+    'Légszűrő',
+    'Pollenszűrő',
+    'Gyújtógyertya',
+    'Üzemanyagszűrő',
+    'Vezérlés (Szíj)',
+    'Fékbetét (első)',
+    'Fékbetét (hátsó)',
+    'Fékfolyadék',
+    'Hűtőfolyadék',
+    'Kuplung'
   ];
   late List<String> _allServiceTypes;
   final List<String> _supportedCarMakes = [
@@ -134,8 +142,8 @@ class _JarmuHozzaadasaState extends State<JarmuHozzaadasa> {
       _imageFile = File(widget.vehicleToEdit!.imagePath!);
     }
     if (_selectedMake != null && !_supportedCarMakes.contains(_selectedMake)) {
-      if (_selectedMake!.isNotEmpty) _supportedCarMakes.insert(
-          0, _selectedMake!);
+      if (_selectedMake!.isNotEmpty)
+        _supportedCarMakes.insert(0, _selectedMake!);
     }
     _mileageController.addListener(() {
       if (_remindersEnabled) setState(() => _validateAllServices());
@@ -171,13 +179,14 @@ class _JarmuHozzaadasaState extends State<JarmuHozzaadasa> {
   }
 
   Future<void> _loadMaintenanceData(Jarmu vehicle) async {
-    final records = await AdatbazisKezelo.instance.getServicesForVehicle(
-        vehicle.id!);
+    final records =
+        await AdatbazisKezelo.instance.getServicesForVehicle(vehicle.id!);
     for (var recordMap in records) {
       final record = Szerviz.fromMap(recordMap);
       for (var type in _allServiceTypes) {
-        if (record.description.toLowerCase().contains(
-            type.toLowerCase().replaceAll(" (szíj)", ""))) {
+        if (record.description
+            .toLowerCase()
+            .contains(type.toLowerCase().replaceAll(" (szíj)", ""))) {
           setState(() {
             _serviceEnabledStates[type] = true;
             if (_dateBasedServiceTypes.contains(type)) {
@@ -243,8 +252,8 @@ class _JarmuHozzaadasaState extends State<JarmuHozzaadasa> {
     setState(() => _isPickingImage = true);
     try {
       final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(
-          source: ImageSource.gallery, imageQuality: 50);
+      final pickedFile =
+          await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
       if (pickedFile != null) {
         setState(() => _imageFile = File(pickedFile.path));
       }
@@ -320,7 +329,8 @@ class _JarmuHozzaadasaState extends State<JarmuHozzaadasa> {
             String description = '$type (automatikus bejegyzés)';
             if (_dateBasedServiceTypes.contains(type) &&
                 _dateBasedServiceDates[type] != null) {
-              final serviceRecord = Szerviz(vehicleId: vehicleId,
+              final serviceRecord = Szerviz(
+                  vehicleId: vehicleId,
                   description: description,
                   date: _dateBasedServiceDates[type]!,
                   cost: 0,
@@ -330,7 +340,8 @@ class _JarmuHozzaadasaState extends State<JarmuHozzaadasa> {
               final controller = _kmBasedServiceControllers[type];
               final mileageToSave = int.tryParse(controller?.text ?? '');
               if (mileageToSave != null) {
-                final serviceRecord = Szerviz(vehicleId: vehicleId,
+                final serviceRecord = Szerviz(
+                    vehicleId: vehicleId,
                     description: description,
                     date: DateTime.now(),
                     cost: 0,
@@ -350,8 +361,8 @@ class _JarmuHozzaadasaState extends State<JarmuHozzaadasa> {
       }
     } on DatabaseException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(
-            e.isUniqueConstraintError()
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(e.isUniqueConstraintError()
                 ? 'Hiba: Ez a rendszám már foglalt!'
                 : 'Adatbázis hiba!'),
             backgroundColor: Colors.redAccent,
@@ -363,7 +374,8 @@ class _JarmuHozzaadasaState extends State<JarmuHozzaadasa> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(backgroundColor: Color(0xFF121212),
+      return const Scaffold(
+          backgroundColor: Color(0xFF121212),
           body: Center(child: CircularProgressIndicator()));
     }
     return Scaffold(
@@ -381,23 +393,28 @@ class _JarmuHozzaadasaState extends State<JarmuHozzaadasa> {
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
           children: [
             _buildMakeDropdown(),
-            _buildTextField(title: 'Modell',
+            _buildTextField(
+                title: 'Modell',
                 controller: _modelController,
                 icon: Icons.star_outline),
-            _buildTextField(title: 'Évjárat',
+            _buildTextField(
+                title: 'Évjárat',
                 controller: _yearController,
                 icon: Icons.calendar_today,
                 keyboardType: TextInputType.number,
                 maxLength: 4),
             _buildDropdown(title: 'Vezérlés', icon: Icons.settings),
-            _buildTextField(title: 'Kilométeróra',
+            _buildTextField(
+                title: 'Kilométeróra',
                 controller: _mileageController,
                 icon: Icons.speed,
                 keyboardType: TextInputType.number),
-            _buildTextField(title: 'Rendszám',
+            _buildTextField(
+                title: 'Rendszám',
                 controller: _licensePlateController,
                 icon: Icons.pin),
-            _buildTextField(title: 'Alvázszám',
+            _buildTextField(
+                title: 'Alvázszám',
                 controller: _vinController,
                 icon: Icons.qr_code,
                 optional: true),
@@ -437,8 +454,12 @@ class _JarmuHozzaadasaState extends State<JarmuHozzaadasa> {
   }
 
   Widget _buildTextField(
-      {required String title, required TextEditingController controller, required IconData icon, bool optional = false, TextInputType keyboardType = TextInputType
-          .text, int? maxLength}) {
+      {required String title,
+      required TextEditingController controller,
+      required IconData icon,
+      bool optional = false,
+      TextInputType keyboardType = TextInputType.text,
+      int? maxLength}) {
     return KozosBemenetiKartya(
       icon: icon,
       title: optional ? '$title (opcionális)' : title,
@@ -448,17 +469,20 @@ class _JarmuHozzaadasaState extends State<JarmuHozzaadasa> {
             color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
         maxLength: maxLength,
         keyboardType: keyboardType,
-        inputFormatters: keyboardType == TextInputType.number ? [
-          FilteringTextInputFormatter.digitsOnly
-        ] : [],
-        decoration: const InputDecoration(border: InputBorder.none,
+        inputFormatters: keyboardType == TextInputType.number
+            ? [FilteringTextInputFormatter.digitsOnly]
+            : [],
+        decoration: const InputDecoration(
+            border: InputBorder.none,
             counterText: '',
             contentPadding: EdgeInsets.zero,
             isDense: true),
         validator: (value) {
           if (!optional && (value == null || value.isEmpty))
             return 'Kötelező mező';
-          if (title == 'Évjárat' && value != null && value.isNotEmpty &&
+          if (title == 'Évjárat' &&
+              value != null &&
+              value.isNotEmpty &&
               value.length != 4) return '4 számjegy';
           return null;
         },
@@ -485,14 +509,16 @@ class _JarmuHozzaadasaState extends State<JarmuHozzaadasa> {
                     borderSide: BorderSide(color: Colors.orange))),
           ),
           menuProps: MenuProps(backgroundColor: const Color(0xFF2A2A2A)),
-          itemBuilder: (context, item, isSelected) =>
-              ListTile(title: Text(item, style: TextStyle(
-                  color: isSelected ? Colors.orange : Colors.white))),
+          itemBuilder: (context, item, isSelected) => ListTile(
+              title: Text(item,
+                  style: TextStyle(
+                      color: isSelected ? Colors.orange : Colors.white))),
         ),
         dropdownDecoratorProps: const DropDownDecoratorProps(
           baseStyle: TextStyle(
               color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-          dropdownSearchDecoration: InputDecoration(border: InputBorder.none,
+          dropdownSearchDecoration: InputDecoration(
+              border: InputBorder.none,
               contentPadding: EdgeInsets.zero,
               isDense: true),
         ),
@@ -501,9 +527,7 @@ class _JarmuHozzaadasaState extends State<JarmuHozzaadasa> {
         onChanged: (String? newValue) =>
             setState(() => _selectedMake = newValue),
         validator: (value) =>
-        (value == null || value.isEmpty)
-            ? 'Kötelező mező'
-            : null,
+            (value == null || value.isEmpty) ? 'Kötelező mező' : null,
       ),
     );
   }
@@ -534,9 +558,8 @@ class _JarmuHozzaadasaState extends State<JarmuHozzaadasa> {
             }
           },
           items: _vezerlesOptions
-              .map<DropdownMenuItem<String>>((
-              String value) =>
-              DropdownMenuItem<String>(value: value, child: Text(value)))
+              .map<DropdownMenuItem<String>>((String value) =>
+                  DropdownMenuItem<String>(value: value, child: Text(value)))
               .toList(),
         ),
       ),
@@ -552,9 +575,10 @@ class _JarmuHozzaadasaState extends State<JarmuHozzaadasa> {
       color: Colors.pinkAccent,
       onTap: _pickImage,
       trailing: hasImage
-          ? ClipRRect(borderRadius: BorderRadius.circular(8),
-          child: Image.file(
-              _imageFile!, width: 50, height: 50, fit: BoxFit.cover))
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.file(_imageFile!,
+                  width: 50, height: 50, fit: BoxFit.cover))
           : const Icon(Icons.add_a_photo_outlined, color: Colors.white30),
     );
   }
@@ -573,8 +597,8 @@ class _JarmuHozzaadasaState extends State<JarmuHozzaadasa> {
                   _selectedVezerlesTipus != 'Szíj') {
                 return const SizedBox.shrink();
               }
-              return _buildMileageInputRow(
-                  type, key: ValueKey('mileage_input_$type'));
+              return _buildMileageInputRow(type,
+                  key: ValueKey('mileage_input_$type'));
             })
           ],
         ),
@@ -585,17 +609,15 @@ class _JarmuHozzaadasaState extends State<JarmuHozzaadasa> {
   Widget _buildDatePickerRow(String serviceType) {
     final bool isEnabled = _serviceEnabledStates[serviceType] ?? false;
     final String dateText = _dateBasedServiceDates[serviceType] != null
-        ? DateFormat('yyyy. MM. dd.').format(
-        _dateBasedServiceDates[serviceType]!)
+        ? DateFormat('yyyy. MM. dd.')
+            .format(_dateBasedServiceDates[serviceType]!)
         : 'Dátum megadása';
 
     Future<void> pickDate() async {
       final DateTime? picked = await showDatePicker(
         context: context,
         initialDate: _dateBasedServiceDates[serviceType] ?? DateTime.now(),
-        firstDate: DateTime(DateTime
-            .now()
-            .year - 20),
+        firstDate: DateTime(DateTime.now().year - 20),
         lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
         locale: const Locale('hu', 'HU'),
         helpText: 'Utolsó műszaki vizsgálat időpontja?',
@@ -643,9 +665,10 @@ class _JarmuHozzaadasaState extends State<JarmuHozzaadasa> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(dateText, style: TextStyle(
-                    color: isEnabled ? Colors.white : Colors.grey[600],
-                    fontSize: 16)),
+                Text(dateText,
+                    style: TextStyle(
+                        color: isEnabled ? Colors.white : Colors.grey[600],
+                        fontSize: 16)),
                 const SizedBox(width: 8),
                 Icon(Icons.edit_calendar_outlined,
                     color: isEnabled ? Colors.orange : Colors.transparent,
@@ -696,10 +719,10 @@ class _JarmuHozzaadasaState extends State<JarmuHozzaadasa> {
                     suffixIcon: Padding(
                         padding: const EdgeInsets.only(left: 8.0),
                         child: Chip(
-                            label: const Text(
-                                'km', style: TextStyle(color: Colors.black)),
-                            backgroundColor: isEnabled ? Colors.white70 : Colors
-                                .transparent,
+                            label: const Text('km',
+                                style: TextStyle(color: Colors.black)),
+                            backgroundColor:
+                                isEnabled ? Colors.white70 : Colors.transparent,
                             padding: EdgeInsets.zero,
                             visualDensity: VisualDensity.compact)),
                     isDense: true,
@@ -709,19 +732,28 @@ class _JarmuHozzaadasaState extends State<JarmuHozzaadasa> {
   }
 
   Widget _buildServiceTile(
-      {required String title, required Widget child, required bool isEnabled, String? errorText, required Function(bool) onToggle, Key? key}) {
+      {required String title,
+      required Widget child,
+      required bool isEnabled,
+      String? errorText,
+      required Function(bool) onToggle,
+      Key? key}) {
     final bool hasError = errorText != null;
     return Material(
         key: key,
-        color: isEnabled ? (hasError ? Colors.red.withOpacity(0.25) : Colors
-            .black.withOpacity(0.3)) : Colors.transparent,
+        color: isEnabled
+            ? (hasError
+                ? Colors.red.withOpacity(0.25)
+                : Colors.black.withOpacity(0.3))
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
             onTap: () => onToggle(!isEnabled),
             borderRadius: BorderRadius.circular(12),
             child: Padding(
                 padding: const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(children: [
                         Checkbox(
@@ -729,20 +761,23 @@ class _JarmuHozzaadasaState extends State<JarmuHozzaadasa> {
                             onChanged: (v) => onToggle(v ?? false),
                             activeColor: Colors.orange,
                             checkColor: Colors.black,
-                            side: BorderSide(
-                                color: Colors.white70, width: 1.5)),
-                        Expanded(child: Text(title, style: const TextStyle(
-                            color: Colors.white, fontSize: 16))),
+                            side:
+                                BorderSide(color: Colors.white70, width: 1.5)),
+                        Expanded(
+                            child: Text(title,
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 16))),
                         child
                       ]),
                       if (hasError && isEnabled)
                         Padding(
                             padding: const EdgeInsets.only(
                                 left: 48.0, bottom: 8.0, right: 16.0),
-                            child: Text(errorText!, style: const TextStyle(
-                                color: Colors.redAccent,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600)))
+                            child: Text(errorText!,
+                                style: const TextStyle(
+                                    color: Colors.redAccent,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600)))
                     ]))));
   }
 }

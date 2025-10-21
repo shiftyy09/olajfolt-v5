@@ -52,33 +52,28 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
   void _deleteVehicle(Jarmu vehicle) async {
     final bool? confirmed = await showDialog(
       context: context,
-      builder: (context) =>
-          AlertDialog(
-            backgroundColor: const Color(0xFF1E1E1E),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15)),
-            title:
-            const Text(
-                'Törlés megerősítése', style: TextStyle(color: Colors.white)),
-            content: Text(
-                'Biztosan törölni szeretnéd a(z) ${vehicle.make} ${vehicle
-                    .model} járművet és minden hozzá tartozó adatot?',
-                style: const TextStyle(color: Colors.white70)),
-            actions: [
-              TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child:
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E1E),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: const Text('Törlés megerősítése',
+            style: TextStyle(color: Colors.white)),
+        content: Text(
+            'Biztosan törölni szeretnéd a(z) ${vehicle.make} ${vehicle.model} járművet és minden hozzá tartozó adatot?',
+            style: const TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child:
                   const Text('Mégse', style: TextStyle(color: Colors.white70))),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Törlés',
-                    style:
-                    TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold)),
-              ),
-            ],
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Törlés',
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold)),
           ),
+        ],
+      ),
     );
     if (confirmed == true) {
       final db = AdatbazisKezelo.instance;
@@ -113,14 +108,13 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
           if (snapshot.hasError) {
             return Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Text(
-                    'Hiba a járművek betöltése közben.\n\nHiba részletei: ${snapshot
-                        .error}',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.red, fontSize: 16),
-                  ),
-                ));
+              padding: const EdgeInsets.all(24.0),
+              child: Text(
+                'Hiba a járművek betöltése közben.\n\nHiba részletei: ${snapshot.error}',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.red, fontSize: 16),
+              ),
+            ));
           }
           final vehicles = snapshot.data ?? [];
           if (vehicles.isEmpty) {
@@ -162,7 +156,6 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
     );
   }
 
-  
   Widget _buildVehicleCard(Jarmu vehicle) {
     final logoPath = _getLogoPath(vehicle.make);
     final bool hasUserImage =
@@ -176,7 +169,7 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
         color: const Color(0xFF1E1E1E),
         clipBehavior: Clip.antiAlias,
         shape:
-        RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -186,14 +179,14 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
               width: double.infinity,
               child: hasUserImage
                   ? Image.file(File(vehicle.imagePath!),
-                  fit: BoxFit.cover,
-                  errorBuilder: (c, e, s) => _buildLogoContainer(logoPath))
+                      fit: BoxFit.cover,
+                      errorBuilder: (c, e, s) => _buildLogoContainer(logoPath))
                   : _buildLogoContainer(logoPath),
             ),
             // KÖZÉPSŐ RÉSZ: AZ ÚJ ELRENDEZÉS
             Padding(
               padding:
-              const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+                  const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
               child: Column(
                 children: [
                   // 1. RENDSZÁMTÁBLA KIEMELVE
@@ -217,8 +210,7 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
                       Text(
                         'Évjárat: ',
                         style: TextStyle(
-                            color: Colors.white.withOpacity(0.6),
-                            fontSize: 15),
+                            color: Colors.white.withOpacity(0.6), fontSize: 15),
                       ),
                       Text(
                         '${vehicle.year}',
@@ -236,7 +228,7 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
             Container(
               color: Colors.black.withOpacity(0.2),
               padding:
-              const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -247,8 +239,7 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
                           color: Colors.white70, size: 20),
                       const SizedBox(width: 10),
                       Text(
-                        '${NumberFormat.decimalPattern('hu_HU').format(
-                            vehicle.mileage)} km',
+                        '${NumberFormat.decimalPattern('hu_HU').format(vehicle.mileage)} km',
                         style: const TextStyle(
                             color: Colors.white70, fontSize: 16),
                       ),
@@ -261,9 +252,8 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
                         icon: const Icon(Icons.edit_outlined,
                             color: Colors.orange, size: 22),
                         tooltip: 'Jármű szerkesztése',
-                        onPressed: () =>
-                            _navigateAndReload(
-                                JarmuHozzaadasa(vehicleToEdit: vehicle)),
+                        onPressed: () => _navigateAndReload(
+                            JarmuHozzaadasa(vehicleToEdit: vehicle)),
                       ),
                       IconButton(
                         icon: const Icon(Icons.delete_outline,
@@ -285,7 +275,7 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
   // A rendszámtábla widget változatlanul megmarad
   Widget _buildLicensePlate(String licensePlate) {
     final cleanPlate =
-    licensePlate.replaceAll(RegExp(r'[^A-Z0-9]'), '').toUpperCase();
+        licensePlate.replaceAll(RegExp(r'[^A-Z0-9]'), '').toUpperCase();
     bool isNewFormat = cleanPlate.length >= 6 &&
         int.tryParse(cleanPlate.substring(cleanPlate.length - 3)) != null;
 
@@ -293,14 +283,17 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
     String part2 = '';
     String part3 = '';
 
-    if (isNewFormat && cleanPlate.length == 7) { // Új formátum: AABB123
+    if (isNewFormat && cleanPlate.length == 7) {
+      // Új formátum: AABB123
       part1 = cleanPlate.substring(0, 2);
       part2 = cleanPlate.substring(2, 4);
       part3 = cleanPlate.substring(4);
-    } else if (cleanPlate.length == 6) { // Régi formátum: ABC123
+    } else if (cleanPlate.length == 6) {
+      // Régi formátum: ABC123
       part1 = cleanPlate.substring(0, 3);
       part3 = cleanPlate.substring(3);
-    } else { // Egyéb esetek
+    } else {
+      // Egyéb esetek
       part1 = cleanPlate;
     }
 
@@ -343,20 +336,24 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(part1, style: const TextStyle(fontFamily: 'LicensePlate',
-                  color: Colors.black,
-                  fontSize: 32,
-                  letterSpacing: 2)),
+              Text(part1,
+                  style: const TextStyle(
+                      fontFamily: 'LicensePlate',
+                      color: Colors.black,
+                      fontSize: 32,
+                      letterSpacing: 2)),
               const SizedBox(width: 6),
-              if(isNewFormat) ...[
-                Image.asset('assets/images/hu_coat_of_arms.png', height: 26,
-                    errorBuilder: (c, e, s) => const SizedBox()),
+              if (isNewFormat) ...[
+                Image.asset('assets/images/hu_coat_of_arms.png',
+                    height: 26, errorBuilder: (c, e, s) => const SizedBox()),
                 const SizedBox(width: 6),
               ],
-              Text(part2, style: const TextStyle(fontFamily: 'LicensePlate',
-                  color: Colors.black,
-                  fontSize: 32,
-                  letterSpacing: 2)),
+              Text(part2,
+                  style: const TextStyle(
+                      fontFamily: 'LicensePlate',
+                      color: Colors.black,
+                      fontSize: 32,
+                      letterSpacing: 2)),
               if (part3.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -366,10 +363,12 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
                           fontSize: 28,
                           fontWeight: FontWeight.bold)),
                 ),
-              Text(part3, style: const TextStyle(fontFamily: 'LicensePlate',
-                  color: Colors.black,
-                  fontSize: 32,
-                  letterSpacing: 2)),
+              Text(part3,
+                  style: const TextStyle(
+                      fontFamily: 'LicensePlate',
+                      color: Colors.black,
+                      fontSize: 32,
+                      letterSpacing: 2)),
             ],
           ),
           const SizedBox(width: 10),

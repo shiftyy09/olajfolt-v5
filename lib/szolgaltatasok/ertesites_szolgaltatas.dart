@@ -5,13 +5,15 @@ import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 class ErtesitesSzolgaltatas {
-  final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _notificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   Future<void> init() async {
     tz.initializeTimeZones();
-    const AndroidInitializationSettings androidSettings = AndroidInitializationSettings(
-        '@drawable/ic_stat_notification');
-    const DarwinInitializationSettings darwinSettings = DarwinInitializationSettings(
+    const AndroidInitializationSettings androidSettings =
+        AndroidInitializationSettings('@drawable/ic_stat_notification');
+    const DarwinInitializationSettings darwinSettings =
+        DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
@@ -31,12 +33,12 @@ class ErtesitesSzolgaltatas {
     required DateTime scheduledDate,
   }) async {
     if (Platform.isAndroid) {
-      final androidImplementation = _notificationsPlugin
-          .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>();
+      final androidImplementation =
+          _notificationsPlugin.resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
       if (androidImplementation != null) {
-        final bool? canScheduleExactAlarms = await androidImplementation
-            .canScheduleExactNotifications();
+        final bool? canScheduleExactAlarms =
+            await androidImplementation.canScheduleExactNotifications();
         if (canScheduleExactAlarms != true) {
           await androidImplementation.requestExactAlarmsPermission();
         }
@@ -59,8 +61,8 @@ class ErtesitesSzolgaltatas {
         iOS: DarwinNotificationDetails(presentSound: true),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation
-          .absoluteTime,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
     );
     print('Értesítés időzítve: "$title", ekkor: $scheduledDate');
   }
@@ -84,18 +86,17 @@ class ErtesitesSzolgaltatas {
         iOS: DarwinNotificationDetails(presentSound: true),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation
-          .absoluteTime,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
     );
     print('Heti értesítés időzítve: "$title"');
   }
 
-  
   tz.TZDateTime _nextInstanceOfTenAM({bool isFirstTime = false}) {
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduledDate = tz.TZDateTime(
-        tz.local, now.year, now.month, now.day, 10);
+    tz.TZDateTime scheduledDate =
+        tz.TZDateTime(tz.local, now.year, now.month, now.day, 10);
 
     // Ha ez az első időzítés, adjunk hozzá egy hetet, hogy ne jöjjön azonnal másnap.
     if (isFirstTime) {
@@ -113,7 +114,7 @@ class ErtesitesSzolgaltatas {
     if (Platform.isAndroid) {
       await _notificationsPlugin
           .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
+              AndroidFlutterLocalNotificationsPlugin>()
           ?.requestNotificationsPermission();
     }
   }

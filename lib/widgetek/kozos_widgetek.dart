@@ -22,10 +22,7 @@ class KozosBemenetiKartya extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         // Amikor a kártyára kattintunk, a benne lévő beviteli mező kapja meg a fókuszt.
-        FocusScope.of(context).requestFocus(Focus
-            .of(context)
-            .children
-            .first);
+        FocusScope.of(context).requestFocus(Focus.of(context).children.first);
       },
       child: Card(
         elevation: 0,

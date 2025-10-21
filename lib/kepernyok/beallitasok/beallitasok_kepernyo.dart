@@ -41,10 +41,6 @@ class _BeallitasokKepernyoState extends State<BeallitasokKepernyo> {
     await prefs.setBool('notificationsEnabled', value);
   }
 
-  
-  
-  
-
   Future<void> _handlePdfExport() async {
     if (_isProcessing) return;
     setState(() => _isProcessing = true);
@@ -67,26 +63,21 @@ class _BeallitasokKepernyoState extends State<BeallitasokKepernyo> {
 
       final Jarmu? selectedVehicle = await showDialog(
         context: context,
-        builder: (context) =>
-            AlertDialog(
-                backgroundColor: const Color(0xFF1E1E1E),
-                title: const Text(
-                    'Válassz járművet', style: TextStyle(color: Colors.white)),
-                content: SizedBox(
-                    width: double.maxFinite,
-                    child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: vehicles.length,
-                        itemBuilder: (context, index) =>
-                            ListTile(
-                                title: Text(
-                                    '${vehicles[index].make} ${vehicles[index]
-                                        .model}',
-                                    style: const TextStyle(
-                                        color: Colors.white)),
-                                onTap: () =>
-                                    Navigator.of(context).pop(
-                                        vehicles[index]))))),
+        builder: (context) => AlertDialog(
+            backgroundColor: const Color(0xFF1E1E1E),
+            title: const Text('Válassz járművet',
+                style: TextStyle(color: Colors.white)),
+            content: SizedBox(
+                width: double.maxFinite,
+                child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: vehicles.length,
+                    itemBuilder: (context, index) => ListTile(
+                        title: Text(
+                            '${vehicles[index].make} ${vehicles[index].model}',
+                            style: const TextStyle(color: Colors.white)),
+                        onTap: () =>
+                            Navigator.of(context).pop(vehicles[index]))))),
       );
 
       if (selectedVehicle == null) {
@@ -96,24 +87,23 @@ class _BeallitasokKepernyoState extends State<BeallitasokKepernyo> {
 
       final ExportAction? action = await showDialog(
         context: context,
-        builder: (context) =>
-            AlertDialog(
-              backgroundColor: const Color(0xFF1E1E1E),
-              title: const Text(
-                  'Válassz műveletet', style: TextStyle(color: Colors.white)),
-              content: Column(mainAxisSize: MainAxisSize.min, children: [
-                ListTile(
-                    leading: const Icon(Icons.save_alt, color: Colors.white70),
-                    title: const Text('Mentés a telefonra',
-                        style: TextStyle(color: Colors.white)),
-                    onTap: () => Navigator.of(context).pop(ExportAction.save)),
-                ListTile(
-                    leading: const Icon(Icons.share, color: Colors.white70),
-                    title: const Text('Megosztás...',
-                        style: TextStyle(color: Colors.white)),
-                    onTap: () => Navigator.of(context).pop(ExportAction.share)),
-              ]),
-            ),
+        builder: (context) => AlertDialog(
+          backgroundColor: const Color(0xFF1E1E1E),
+          title: const Text('Válassz műveletet',
+              style: TextStyle(color: Colors.white)),
+          content: Column(mainAxisSize: MainAxisSize.min, children: [
+            ListTile(
+                leading: const Icon(Icons.save_alt, color: Colors.white70),
+                title: const Text('Mentés a telefonra',
+                    style: TextStyle(color: Colors.white)),
+                onTap: () => Navigator.of(context).pop(ExportAction.save)),
+            ListTile(
+                leading: const Icon(Icons.share, color: Colors.white70),
+                title: const Text('Megosztás...',
+                    style: TextStyle(color: Colors.white)),
+                onTap: () => Navigator.of(context).pop(ExportAction.share)),
+          ]),
+        ),
       );
 
       if (action == null) {
@@ -186,17 +176,18 @@ class _BeallitasokKepernyoState extends State<BeallitasokKepernyo> {
     if (_isProcessing) return;
     final bool? confirmed = await showDialog(
       context: context,
-      builder: (context) =>
-          AlertDialog(
-              title: const Text('Figyelem!'),
-              content: const Text(
-                  'Az importálás felülírja az összes jelenlegi adatodat. Biztosan folytatod?'),
-              actions: [
-                TextButton(onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('Mégse')),
-                TextButton(onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text('Folytatás'))
-              ]),
+      builder: (context) => AlertDialog(
+          title: const Text('Figyelem!'),
+          content: const Text(
+              'Az importálás felülírja az összes jelenlegi adatodat. Biztosan folytatod?'),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Mégse')),
+            TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Folytatás'))
+          ]),
     );
     if (confirmed != true) return;
     setState(() => _isProcessing = true);
@@ -253,9 +244,8 @@ class _BeallitasokKepernyoState extends State<BeallitasokKepernyo> {
       return;
     }
     final db = AdatbazisKezelo.instance;
-    final vehicles = (await db.getVehicles())
-        .map((map) => Jarmu.fromMap(map))
-        .toList();
+    final vehicles =
+        (await db.getVehicles()).map((map) => Jarmu.fromMap(map)).toList();
     int notificationId = 0;
     for (var vehicle in vehicles) {
       if (vehicle.muszakiErvenyesseg != null) {
@@ -268,26 +258,27 @@ class _BeallitasokKepernyoState extends State<BeallitasokKepernyo> {
           await _ertesitesSzolgaltatas.scheduleNotification(
               id: notificationId++,
               title: 'Lejáró műszaki: ${vehicle.make}',
-              body: 'A(z) ${vehicle
-                  .licensePlate} műszaki vizsgája 1 hónap múlva lejár.',
+              body:
+                  'A(z) ${vehicle.licensePlate} műszaki vizsgája 1 hónap múlva lejár.',
               scheduledDate: oneMonthBefore);
         }
         if (oneWeekBefore.isAfter(now)) {
           await _ertesitesSzolgaltatas.scheduleNotification(
               id: notificationId++,
               title: 'Lejáró műszaki: ${vehicle.make}',
-              body: 'Figyelem! A(z) ${vehicle
-                  .licensePlate} műszaki vizsgája 1 hét múlva lejár!',
-              scheduledDate: DateTime(
-                  oneWeekBefore.year, oneWeekBefore.month, oneWeekBefore.day,
-                  10));
+              body:
+                  'Figyelem! A(z) ${vehicle.licensePlate} műszaki vizsgája 1 hét múlva lejár!',
+              scheduledDate: DateTime(oneWeekBefore.year, oneWeekBefore.month,
+                  oneWeekBefore.day, 10));
         }
       }
     }
     if (vehicles.isNotEmpty) {
-      await _ertesitesSzolgaltatas.scheduleWeeklyNotification(id: 999,
+      await _ertesitesSzolgaltatas.scheduleWeeklyNotification(
+          id: 999,
           title: 'Olajfolt Emlékeztető',
-          body: 'Ne felejtsd el frissíteni a km óra állást a pontos emlékeztetőkért!');
+          body:
+              'Ne felejtsd el frissíteni a km óra állást a pontos emlékeztetőkért!');
     }
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -297,43 +288,48 @@ class _BeallitasokKepernyoState extends State<BeallitasokKepernyo> {
   }
 
   void _showInfoDialog() {
-    showDialog(context: context, builder: (context) =>
-        AlertDialog(
-          backgroundColor: const Color(0xFF1E1E1E),
-          title: const Row(children: [
-            Icon(Icons.info_outline, color: Colors.amber),
-            SizedBox(width: 10),
-            Text('Beállítások Működése',
-                style: TextStyle(color: Colors.white, fontSize: 18))
-          ]),
-          content: const SingleChildScrollView(child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Adatkezelés', style: TextStyle(
-                  color: Colors.amber, fontWeight: FontWeight.bold)),
-              SizedBox(height: 8),
-              Text(
-                '• PDF Export: Egyetlen jármű szerviztörténetét menti egy szépen formázott adatlapra.\n'
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              backgroundColor: const Color(0xFF1E1E1E),
+              title: const Row(children: [
+                Icon(Icons.info_outline, color: Colors.amber),
+                SizedBox(width: 10),
+                Text('Beállítások Működése',
+                    style: TextStyle(color: Colors.white, fontSize: 18))
+              ]),
+              content: const SingleChildScrollView(
+                  child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Adatkezelés',
+                      style: TextStyle(
+                          color: Colors.amber, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 8),
+                  Text(
+                    '• PDF Export: Egyetlen jármű szerviztörténetét menti egy szépen formázott adatlapra.\n'
                     '• CSV Export: Az ÖSSZES jármű és szerviz adatát elmenti egy egyszerű szöveges (.csv) fájlba. Ez a funkció az "app költöztetésére" és biztonsági mentésre szolgál.\n'
                     '• CSV Import: Visszatölti az összes adatot egy korábban mentett .csv fájlból. Figyelem, ez a művelet felülírja a jelenlegi adatokat!',
-                style: TextStyle(color: Colors.white70),
-              ),
-              SizedBox(height: 16),
-              Text('Értesítések', style: TextStyle(
-                  color: Colors.amber, fontWeight: FontWeight.bold)),
-              SizedBox(height: 8),
-              Text(
-                  'A kapcsoló bekapcsolásával engedélyezed, hogy az alkalmazás a háttérben is küldjön emlékeztetőket a közelgő műszaki vizsgáról és hetente egyszer a kilométeróra állás frissítéséről.',
-                  style: TextStyle(color: Colors.white70)),
-            ],
-          )),
-          actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(),
-                child: const Text(
-                    'Értem', style: TextStyle(color: Colors.amber)))
-          ],
-        ));
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                  SizedBox(height: 16),
+                  Text('Értesítések',
+                      style: TextStyle(
+                          color: Colors.amber, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 8),
+                  Text(
+                      'A kapcsoló bekapcsolásával engedélyezed, hogy az alkalmazás a háttérben is küldjön emlékeztetőket a közelgő műszaki vizsgáról és hetente egyszer a kilométeróra állás frissítéséről.',
+                      style: TextStyle(color: Colors.white70)),
+                ],
+              )),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Értem',
+                        style: TextStyle(color: Colors.amber)))
+              ],
+            ));
   }
 
   @override
@@ -345,7 +341,8 @@ class _BeallitasokKepernyoState extends State<BeallitasokKepernyo> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          IconButton(icon: const Icon(Icons.info_outline, color: Colors.amber),
+          IconButton(
+              icon: const Icon(Icons.info_outline, color: Colors.amber),
               tooltip: 'Hogyan működik?',
               onPressed: _showInfoDialog)
         ],
@@ -360,10 +357,13 @@ class _BeallitasokKepernyoState extends State<BeallitasokKepernyo> {
             subtitle: 'Generálj egy adatlapot a járművedről',
             color: Colors.red.shade400,
             onTap: _isProcessing ? () {} : () => _handlePdfExport(),
-            trailing: _isProcessing ? const SizedBox(width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                    strokeWidth: 2, color: Colors.red)) : null,
+            trailing: _isProcessing
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: Colors.red))
+                : null,
           ),
           KozosMenuKartya(
             icon: Icons.upload_file,
@@ -371,10 +371,13 @@ class _BeallitasokKepernyoState extends State<BeallitasokKepernyo> {
             subtitle: 'Minden adat kimentése egyetlen fájlba',
             color: Colors.blue.shade400,
             onTap: _isProcessing ? () {} : () => _handleCsvExport(),
-            trailing: _isProcessing ? const SizedBox(width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                    strokeWidth: 2, color: Colors.blue)) : null,
+            trailing: _isProcessing
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: Colors.blue))
+                : null,
           ),
           KozosMenuKartya(
             icon: Icons.download,
@@ -382,10 +385,13 @@ class _BeallitasokKepernyoState extends State<BeallitasokKepernyo> {
             subtitle: 'Adatok visszatöltése mentésből',
             color: Colors.green.shade400,
             onTap: _isProcessing ? () {} : () => _handleCsvImport(),
-            trailing: _isProcessing ? const SizedBox(width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                    strokeWidth: 2, color: Colors.green)) : null,
+            trailing: _isProcessing
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: Colors.green))
+                : null,
           ),
           const SizedBox(height: 20),
           _buildSectionHeader(context, 'Értesítések'),

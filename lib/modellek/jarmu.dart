@@ -77,8 +77,8 @@ class Jarmu {
       mileage: mileage ?? this.mileage,
       vezerlesTipusa: vezerlesTipusa ?? this.vezerlesTipusa,
       imagePath: imagePath ?? this.imagePath,
-      muszakiErvenyesseg: muszakiErvenyesseg ??
-          this.muszakiErvenyesseg, // <<<--- ÚJ
+      muszakiErvenyesseg:
+          muszakiErvenyesseg ?? this.muszakiErvenyesseg, // <<<--- ÚJ
     );
   }
 }

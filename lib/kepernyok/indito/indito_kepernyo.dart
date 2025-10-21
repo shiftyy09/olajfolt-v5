@@ -26,8 +26,7 @@ class _InditoKepernyoState extends State<InditoKepernyo>
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
-    )
-      ..repeat(reverse: true);
+    )..repeat(reverse: true);
 
     _fadeAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
@@ -37,8 +36,8 @@ class _InditoKepernyoState extends State<InditoKepernyo>
   void _initializeApp() async {
     // Elindítjuk az adatbázis betöltését és egy minimális várakozási időt
     final dbFuture = AdatbazisKezelo.instance.database;
-    final minDelayFuture = Future.delayed(
-        const Duration(milliseconds: 2000)); // 2 másodperc
+    final minDelayFuture =
+        Future.delayed(const Duration(milliseconds: 2000)); // 2 másodperc
 
     // Megvárjuk, amíg mindkettő befejeződik
     await Future.wait([dbFuture, minDelayFuture]);
@@ -68,9 +67,6 @@ class _InditoKepernyoState extends State<InditoKepernyo>
     return Scaffold(
       backgroundColor: Colors.black,
       body: Center(
-        
-        
-        
         // A Column-t kivettem, mert már csak egyetlen widget, a kép van benne.
         child: FadeTransition(
           opacity: _fadeAnimation,
@@ -81,7 +77,6 @@ class _InditoKepernyoState extends State<InditoKepernyo>
           ),
         ),
         // A Text("Szerviz-napló") és a SizedBox innen lett eltávolítva.
-        
       ),
     );
   }

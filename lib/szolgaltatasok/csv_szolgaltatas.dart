@@ -42,11 +42,12 @@ class CsvSzolgaltatas {
       ];
       serviceCsv = const ListToCsvConverter().convert(serviceRows);
     }
-    String combinedCsv = "---VEHICLES---\n$vehicleCsv\n---SERVICES---\n$serviceCsv";
+    String combinedCsv =
+        "---VEHICLES---\n$vehicleCsv\n---SERVICES---\n$serviceCsv";
 
     try {
       Directory? directory;
-      
+
       if (Platform.isAndroid) {
         // A legtöbb Android verzión ez a publikus tárhely gyökerébe mutat.
         directory = await getExternalStorageDirectory();
@@ -70,10 +71,9 @@ class CsvSzolgaltatas {
         print("Nem sikerült meghatározni a mentési mappát.");
         return null;
       }
-      
 
-      final String formattedDate = DateFormat('yyyy-MM-dd_HH-mm').format(
-          DateTime.now());
+      final String formattedDate =
+          DateFormat('yyyy-MM-dd_HH-mm').format(DateTime.now());
       final String fileName = "olajfolt_mentes_$formattedDate.csv";
       final File file = File("${directory.path}/$fileName");
 
@@ -100,9 +100,7 @@ class CsvSzolgaltatas {
 
     try {
       final String content = await file.readAsString();
-      if (content
-          .trim()
-          .isEmpty) {
+      if (content.trim().isEmpty) {
         return ImportResult.emptyFile;
       }
       if (!content.contains('---VEHICLES---') ||
@@ -118,15 +116,15 @@ class CsvSzolgaltatas {
       await db.clearAllData();
 
       if (vehiclePart.isNotEmpty) {
-        List<List<dynamic>> vehicleRows = const CsvToListConverter(
-            shouldParseNumbers: false).convert(vehiclePart);
+        List<List<dynamic>> vehicleRows =
+            const CsvToListConverter(shouldParseNumbers: false)
+                .convert(vehiclePart);
         if (vehicleRows.length > 1) {
-          List<String> headers = vehicleRows[0]
-              .map((h) => h.toString())
-              .toList();
+          List<String> headers =
+              vehicleRows[0].map((h) => h.toString()).toList();
           for (int i = 1; i < vehicleRows.length; i++) {
-            Map<String, dynamic> rowMap = Map.fromIterables(
-                headers, vehicleRows[i]);
+            Map<String, dynamic> rowMap =
+                Map.fromIterables(headers, vehicleRows[i]);
 
             rowMap['id'] = int.tryParse(rowMap['id']?.toString() ?? '');
             rowMap['year'] = int.tryParse(rowMap['year']?.toString() ?? '');
@@ -134,7 +132,8 @@ class CsvSzolgaltatas {
                 int.tryParse(rowMap['mileage']?.toString() ?? '');
 
             var muszakiDateString = rowMap['muszakiErvenyesseg']?.toString();
-            if (muszakiDateString == null || muszakiDateString.isEmpty ||
+            if (muszakiDateString == null ||
+                muszakiDateString.isEmpty ||
                 muszakiDateString.toLowerCase() == 'null') {
               rowMap['muszakiErvenyesseg'] = null;
             }
@@ -145,15 +144,15 @@ class CsvSzolgaltatas {
       }
 
       if (servicePart.isNotEmpty) {
-        List<List<dynamic>> serviceRows = const CsvToListConverter(
-            shouldParseNumbers: false).convert(servicePart);
+        List<List<dynamic>> serviceRows =
+            const CsvToListConverter(shouldParseNumbers: false)
+                .convert(servicePart);
         if (serviceRows.length > 1) {
-          List<String> headers = serviceRows[0]
-              .map((h) => h.toString())
-              .toList();
+          List<String> headers =
+              serviceRows[0].map((h) => h.toString()).toList();
           for (int i = 1; i < serviceRows.length; i++) {
-            Map<String, dynamic> rowMap = Map.fromIterables(
-                headers, serviceRows[i]);
+            Map<String, dynamic> rowMap =
+                Map.fromIterables(headers, serviceRows[i]);
 
             rowMap['id'] = int.tryParse(rowMap['id']?.toString() ?? '');
             rowMap['vehicleId'] =
@@ -163,7 +162,8 @@ class CsvSzolgaltatas {
             rowMap['cost'] = num.tryParse(rowMap['cost']?.toString() ?? '0');
 
             var serviceDateString = rowMap['date']?.toString();
-            if (serviceDateString == null || serviceDateString.isEmpty ||
+            if (serviceDateString == null ||
+                serviceDateString.isEmpty ||
                 serviceDateString.toLowerCase() == 'null') {
               rowMap['date'] = DateTime.now().toIso8601String();
             }

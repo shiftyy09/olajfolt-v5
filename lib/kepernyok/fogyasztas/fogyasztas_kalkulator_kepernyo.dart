@@ -27,10 +27,8 @@ class _FogyasztasKalkulatorKepernyoState
   double _monthlyLiters = 0;
   bool _isLoading = true;
 
-  
   final UzemanyagArSzolgaltatas _arSzolgaltatas = UzemanyagArSzolgaltatas();
   late Future<UzemanyagArak?> _fuelPricesFuture; // Új állapotváltozó
-  
 
   @override
   void initState() {
@@ -39,9 +37,7 @@ class _FogyasztasKalkulatorKepernyoState
     _priceController.addListener(_calculateTotal);
     _loadMonthlyStats();
 
-    
     _fuelPricesFuture = _arSzolgaltatas.fetchFuelPrices();
-    
   }
 
   @override
@@ -56,56 +52,54 @@ class _FogyasztasKalkulatorKepernyoState
   void _showInfoDialog() {
     showDialog(
       context: context,
-      builder: (context) =>
-          AlertDialog(
-            backgroundColor: const Color(0xFF1E1E1E),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15)),
-            title: const Row(children: [
-              Icon(Icons.info_outline, color: Colors.cyanAccent),
-              SizedBox(width: 10),
-              Text('Hogyan működik?', style: TextStyle(color: Colors.white)),
-            ]),
-            content: const SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Ezen a képernyőn egyszerűen rögzítheted a tankolásaidat, a program pedig automatikusan összegzi a havi költségeidet.',
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                  SizedBox(height: 15),
-                  Text('Működése:',
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 8),
-                  Text(
-                      '1. Töltsd ki a tankolt mennyiséget, az egységárat és a km-óra állását.',
-                      style: TextStyle(color: Colors.white70)),
-                  SizedBox(height: 8),
-                  Text('2. A "Teljes költség" automatikusan kiszámolódik.',
-                      style: TextStyle(color: Colors.white70)),
-                  SizedBox(height: 8),
-                  Text(
-                      '3. A "Mentés" gombbal az adatokat elmentjük a Szerviznaplóba.',
-                      style: TextStyle(color: Colors.white70)),
-                  SizedBox(height: 15),
-                  Text(
-                    'Az alsó kártya mindig az aktuális hónapban elköltött összesített üzemanyag-költséget és mennyiséget mutatja.',
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                ],
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E1E),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: const Row(children: [
+          Icon(Icons.info_outline, color: Colors.cyanAccent),
+          SizedBox(width: 10),
+          Text('Hogyan működik?', style: TextStyle(color: Colors.white)),
+        ]),
+        content: const SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Ezen a képernyőn egyszerűen rögzítheted a tankolásaidat, a program pedig automatikusan összegzi a havi költségeidet.',
+                style: TextStyle(color: Colors.white70),
               ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child:
-                const Text('Értem', style: TextStyle(color: Colors.cyanAccent)),
+              SizedBox(height: 15),
+              Text('Működése:',
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
+              Text(
+                  '1. Töltsd ki a tankolt mennyiséget, az egységárat és a km-óra állását.',
+                  style: TextStyle(color: Colors.white70)),
+              SizedBox(height: 8),
+              Text('2. A "Teljes költség" automatikusan kiszámolódik.',
+                  style: TextStyle(color: Colors.white70)),
+              SizedBox(height: 8),
+              Text(
+                  '3. A "Mentés" gombbal az adatokat elmentjük a Szerviznaplóba.',
+                  style: TextStyle(color: Colors.white70)),
+              SizedBox(height: 15),
+              Text(
+                'Az alsó kártya mindig az aktuális hónapban elköltött összesített üzemanyag-költséget és mennyiséget mutatja.',
+                style: TextStyle(color: Colors.white70),
               ),
             ],
           ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child:
+                const Text('Értem', style: TextStyle(color: Colors.cyanAccent)),
+          ),
+        ],
+      ),
     );
   }
 
@@ -123,10 +117,7 @@ class _FogyasztasKalkulatorKepernyoState
           service.description.startsWith('Tankolás')) {
         cost += service.cost;
         final literString =
-        service.description
-            .split('(')
-            .last
-            .replaceAll(' liter)', '');
+            service.description.split('(').last.replaceAll(' liter)', '');
         liters += double.tryParse(literString) ?? 0;
       }
     }
@@ -156,8 +147,8 @@ class _FogyasztasKalkulatorKepernyoState
       final liters =
           double.tryParse(_literController.text.replaceAll(',', '.')) ?? 0;
       final cost =
-      (double.tryParse(_totalCostController.text.replaceAll(',', '.')) ?? 0)
-          .toInt();
+          (double.tryParse(_totalCostController.text.replaceAll(',', '.')) ?? 0)
+              .toInt();
       final odometer =
           int.tryParse(_odometerController.text.replaceAll(',', '.')) ?? 0;
       final newFueling = Szerviz(
@@ -206,8 +197,8 @@ class _FogyasztasKalkulatorKepernyoState
             child: Form(
               key: _formKey,
               child: ListView(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 10.0),
                 children: [
                   _buildInputCard(),
                   const SizedBox(height: 20),
@@ -300,7 +291,7 @@ class _FogyasztasKalkulatorKepernyoState
 
   Widget _buildStatsCard() {
     final monthName =
-    DateFormat.MMMM('hu_HU').format(DateTime.now()).toUpperCase();
+        DateFormat.MMMM('hu_HU').format(DateTime.now()).toUpperCase();
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -313,40 +304,41 @@ class _FogyasztasKalkulatorKepernyoState
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '$monthName havi összegzés',
-              style: TextStyle(
-                  color: Colors.cyan.shade300,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            _buildResultRow(
-              icon: Icons.monetization_on_outlined,
-              label: 'Összesen költöttél',
-              value:
-              '${NumberFormat.decimalPattern('hu_HU').format(_monthlyCost)} Ft',
-              color: Colors.white,
-            ),
-            const Divider(color: Colors.white24, height: 25),
-            _buildResultRow(
-              icon: Icons.local_gas_station_outlined,
-              label: 'Összesen tankoltál',
-              value: '${_monthlyLiters.toStringAsFixed(2)} liter',
-              color: Colors.white,
-            ),
-          ],
-        ),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '$monthName havi összegzés',
+                    style: TextStyle(
+                        color: Colors.cyan.shade300,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildResultRow(
+                    icon: Icons.monetization_on_outlined,
+                    label: 'Összesen költöttél',
+                    value:
+                        '${NumberFormat.decimalPattern('hu_HU').format(_monthlyCost)} Ft',
+                    color: Colors.white,
+                  ),
+                  const Divider(color: Colors.white24, height: 25),
+                  _buildResultRow(
+                    icon: Icons.local_gas_station_outlined,
+                    label: 'Összesen tankoltál',
+                    value: '${_monthlyLiters.toStringAsFixed(2)} liter',
+                    color: Colors.white,
+                  ),
+                ],
+              ),
       ),
     );
   }
 
-  Widget _buildResultRow({required IconData icon,
-    required String label,
-    required String value,
-    required Color color}) {
+  Widget _buildResultRow(
+      {required IconData icon,
+      required String label,
+      required String value,
+      required Color color}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -365,15 +357,16 @@ class _FogyasztasKalkulatorKepernyoState
     );
   }
 
-  Widget _buildTextFormField({required TextEditingController controller,
-    required String labelText,
-    required IconData icon,
-    bool readOnly = false}) {
+  Widget _buildTextFormField(
+      {required TextEditingController controller,
+      required String labelText,
+      required IconData icon,
+      bool readOnly = false}) {
     return TextFormField(
       controller: controller,
       readOnly: readOnly,
-      style:
-      TextStyle(color: readOnly ? Colors.white70 : Colors.white, fontSize: 16),
+      style: TextStyle(
+          color: readOnly ? Colors.white70 : Colors.white, fontSize: 16),
       decoration: InputDecoration(
         labelText: labelText,
         labelStyle: const TextStyle(color: Colors.white70),
@@ -411,7 +404,7 @@ class _FogyasztasKalkulatorKepernyoState
           return const Padding(
             padding: EdgeInsets.all(16.0),
             child:
-            Center(child: CircularProgressIndicator(color: Colors.amber)),
+                Center(child: CircularProgressIndicator(color: Colors.amber)),
           );
         }
         if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
@@ -429,8 +422,7 @@ class _FogyasztasKalkulatorKepernyoState
         final arak = snapshot.data!;
         return Container(
           width: double.infinity,
-          padding:
-          const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
           decoration: BoxDecoration(
             color: const Color(0xFF1E1E1E),
             border: Border(
