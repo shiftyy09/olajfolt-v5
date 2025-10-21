@@ -1,28 +1,31 @@
-# Ez a workflow a Dart kódelemzést futtatja
+# A munkafolyamat neve
 name: Dart CI
 
-# Ez a sor indítja el, ha push vagy pull request történik a main ágon.
-# A "on:" kulcsszó a sor legelején kell, hogy legyen, behúzás nélkül.
-on:  push:
+# Ez a sor indítja el a folyamatot
+on:
+  # Akkor fusson, ha a 'main' ágra push történik
+  push:
     branches: [ main ]
+  # Vagy ha a 'main' ágra érkezik egy pull request
   pull_request:
     branches: [ main ]
 
 jobs:
+  # A job neve, ami a kódelemzést végzi
   analyze:
     # A legfrissebb Ubuntu virtuális gépet használja
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Kód letöltése
+      # 1. Kód letöltése a repozitóriumból
       - uses: actions/checkout@v4
 
       # 2. Flutter környezet beállítása
-      # Fontos, hogy itt is ugyanazt a stabil verziót használjuk, mint a buildeknél!
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.2' # Ugyanaz a stabil verzió, mint a másik két fájlban
+          # Ugyanazt a stabil verziót használjuk, mint a többi buildnél
+          flutter-version: '3.22.2'
           channel: 'stable'
           cache: true
 
@@ -30,10 +33,10 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      # 4. Kód formázásának ellenőrzése
-      - name: Check formatting
+      # 4. Kódformázás ellenőrzése
+      - name: Check for formatting issues
         run: dart format --output=none --set-exit-if-changed .
 
-      # 5. Kódelemzés futtatása (linting)
-      - name: Analyze project
+      # 5. Kódelemzés futtatása (hibák és figyelmeztetések keresése)
+      - name: Analyze project source
         run: flutter analyze
