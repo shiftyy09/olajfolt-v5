@@ -1,4 +1,3 @@
-yml
 # A munkafolyamat neve, ami megjelenik a GitHub Actions fülön
 name: Build Olajfolt IPA
 
