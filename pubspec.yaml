@@ -10,16 +10,14 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # === EZ AZ ÚJ, HIÁNYZÓ BLOKK A MAGYAROSÍTÁSHOZ ===
   flutter_localizations:
     sdk: flutter
-  # ===============================================
 
   cupertino_icons: ^1.0.6
   sqflite: ^2.3.0
   path: ^1.8.3
-  shared_preferences: ^2.2.2 # Frissítettem egy stabilabb verzióra
-  intl: ^0.20.2
+  shared_preferences: ^2.2.2
+  intl: ^0.20.2 # A hibaüzenetek alapján frissítve
   http: ^1.2.1
   dropdown_search: ^5.0.6
   diacritic: ^0.1.5
@@ -44,7 +42,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
-    - assets/fonts/
+
 
 flutter_launcher_icons:
   android: "launcher_icon"

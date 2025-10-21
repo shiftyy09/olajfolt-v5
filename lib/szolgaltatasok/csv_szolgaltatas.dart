@@ -9,35 +9,6 @@ import 'package:permission_handler/permission_handler.dart';
 enum ImportResult { success, error, noFileSelected, invalidFormat, emptyFile }
 
 class CsvSzolgaltatas {
-  // Új, megbízhatóbb mentési logika
-  Future<String?> getDownloadPath() async {
-    Directory? directory;
-    try {
-      if (Platform.isIOS) {
-        directory = await getApplicationDocumentsDirectory();
-      } else { // Android és egyéb platformok
-        // A getExternalStorageDirectory a legtöbb Android verzión a felhasználó által
-        // látható belső tárhely gyökerére mutat.
-        directory = await getExternalStorageDirectory();
-        if (directory == null) {
-          print("Hiba: A külső tárhely nem elérhető.");
-          return null;
-        }
-
-        // Manuálisan hozzuk létre a "Download" mappát a gyökérben, ha még nem létezik.
-        String downloadPath = '${directory.path}/Download';
-        final downloadDir = Directory(downloadPath);
-        if (!await downloadDir.exists()) {
-          await downloadDir.create(recursive: true);
-        }
-        directory = downloadDir;
-      }
-    } catch (err) {
-      print("Hiba a mentési mappa elérésekor: $err");
-    }
-    return directory?.path;
-  }
-
   Future<String?> exportAllDataToCsv() async {
     if (Platform.isAndroid) {
       var status = await Permission.storage.request();
@@ -54,6 +25,7 @@ class CsvSzolgaltatas {
       return "empty";
     }
 
+    // CSV generálás logikája (változatlan)
     String vehicleCsv = "";
     if (vehicles.isNotEmpty) {
       List<List<dynamic>> vehicleRows = [
@@ -70,17 +42,40 @@ class CsvSzolgaltatas {
       ];
       serviceCsv = const ListToCsvConverter().convert(serviceRows);
     }
-
     String combinedCsv = "---VEHICLES---\n$vehicleCsv\n---SERVICES---\n$serviceCsv";
 
     try {
-      final path = await getDownloadPath();
-      if (path == null) return null;
+      Directory? directory;
+      
+      if (Platform.isAndroid) {
+        // A legtöbb Android verzión ez a publikus tárhely gyökerébe mutat.
+        directory = await getExternalStorageDirectory();
+        if (directory == null) {
+          print("Hiba: A külső tárhely nem elérhető.");
+          return null;
+        }
+        // Manuálisan hozzuk létre a "Download" almappát a gyökérben.
+        // Ez a mappa látható lesz a legtöbb fájlkezelőben.
+        final downloadDir = Directory('${directory.path}/Download');
+        if (!await downloadDir.exists()) {
+          await downloadDir.create(recursive: true);
+        }
+        directory = downloadDir;
+      } else if (Platform.isIOS) {
+        // iOS-en az alkalmazás dokumentum mappáját használjuk.
+        directory = await getApplicationDocumentsDirectory();
+      }
+
+      if (directory == null) {
+        print("Nem sikerült meghatározni a mentési mappát.");
+        return null;
+      }
+      
 
       final String formattedDate = DateFormat('yyyy-MM-dd_HH-mm').format(
           DateTime.now());
       final String fileName = "olajfolt_mentes_$formattedDate.csv";
-      final File file = File("$path/$fileName");
+      final File file = File("${directory.path}/$fileName");
 
       await file.writeAsString(combinedCsv);
       print("Sikeres exportálás ide: ${file.path}");
@@ -94,7 +89,9 @@ class CsvSzolgaltatas {
   // Javított, "bolondbiztos" import logika
   Future<ImportResult> importDataFromCsv() async {
     final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom, allowedExtensions: ['csv']);
+      type: FileType.custom,
+      allowedExtensions: ['csv'],
+    );
     if (result == null || result.files.single.path == null) {
       return ImportResult.noFileSelected;
     }
@@ -131,19 +128,15 @@ class CsvSzolgaltatas {
             Map<String, dynamic> rowMap = Map.fromIterables(
                 headers, vehicleRows[i]);
 
-            // Biztonságos konverziók
-            rowMap['id'] = int.tryParse(rowMap['id'].toString());
-            rowMap['year'] = int.tryParse(rowMap['year'].toString());
-            rowMap['mileage'] = int.tryParse(rowMap['mileage'].toString());
+            rowMap['id'] = int.tryParse(rowMap['id']?.toString() ?? '');
+            rowMap['year'] = int.tryParse(rowMap['year']?.toString() ?? '');
+            rowMap['mileage'] =
+                int.tryParse(rowMap['mileage']?.toString() ?? '');
 
-            // === DÁTUM ELLENŐRZÉS: EZ OLDJA MEG AZ IOS HIBÁT ===
-            if (rowMap['muszakiErvenyesseg'] == null ||
-                rowMap['muszakiErvenyesseg']
-                    .toString()
-                    .isEmpty) {
+            var muszakiDateString = rowMap['muszakiErvenyesseg']?.toString();
+            if (muszakiDateString == null || muszakiDateString.isEmpty ||
+                muszakiDateString.toLowerCase() == 'null') {
               rowMap['muszakiErvenyesseg'] = null;
-            } else {
-              // Itt nem kell újra formázni, az adatbázis a Stringet várja
             }
 
             await db.insert('vehicles', rowMap);
@@ -162,14 +155,16 @@ class CsvSzolgaltatas {
             Map<String, dynamic> rowMap = Map.fromIterables(
                 headers, serviceRows[i]);
 
-            rowMap['id'] = int.tryParse(rowMap['id'].toString());
-            rowMap['vehicleId'] = int.tryParse(rowMap['vehicleId'].toString());
-            rowMap['mileage'] = int.tryParse(rowMap['mileage'].toString());
-            rowMap['cost'] = num.tryParse(rowMap['cost'].toString());
+            rowMap['id'] = int.tryParse(rowMap['id']?.toString() ?? '');
+            rowMap['vehicleId'] =
+                int.tryParse(rowMap['vehicleId']?.toString() ?? '');
+            rowMap['mileage'] =
+                int.tryParse(rowMap['mileage']?.toString() ?? '');
+            rowMap['cost'] = num.tryParse(rowMap['cost']?.toString() ?? '0');
 
-            if (rowMap['date'] == null || rowMap['date']
-                .toString()
-                .isEmpty) {
+            var serviceDateString = rowMap['date']?.toString();
+            if (serviceDateString == null || serviceDateString.isEmpty ||
+                serviceDateString.toLowerCase() == 'null') {
               rowMap['date'] = DateTime.now().toIso8601String();
             }
 

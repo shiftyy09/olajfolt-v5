@@ -10,10 +10,10 @@ android {
     ndkVersion = "27.0.12077973"
 
     compileOptions {
-        // ================= JAVÍTÁS 1. RÉSZ =================
+        
         // Desugaring bekapcsolása
         isCoreLibraryDesugaringEnabled = true
-        // ====================================================
+        
 
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -30,10 +30,10 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        // ================= JAVÍTÁS 2. RÉSZ =================
+        
         // MultiDex bekapcsolása (fontos a desugaring-hoz)
         multiDexEnabled = true
-        // ====================================================
+        
     }
 
     buildTypes {
@@ -47,10 +47,10 @@ flutter {
     source = "../.."
 }
 
-// ================= JAVÍTÁS 3. RÉSZ =================
+
 // A hiányzó `dependencies` blokk hozzáadása a desugaring könyvtárral
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }
-// ====================================================
+
 

@@ -72,13 +72,8 @@ class PdfSzolgaltatas {
     return pdf.save();
   }
 
-  // --- JAVÍTVA: Mentés logikája modern Android verziókhoz ---
   Future<bool> _saveToDevice(Uint8List bytes, String fileName) async {
-    // A modern Android verziókon (10+) nincs szükség külön engedélyre a 'Downloads' mappába való íráshoz.
-    // A régebbi verziókhoz viszont kellhet, ezért egy verzió-ellenőrzést végzünk.
     if (Platform.isAndroid) {
-      // Csak Android 9 (API 28) és régebbi verziókon kérünk engedélyt.
-      // Az újabbaknál a rendszer automatikusan engedélyezi a mentést a Letöltésekbe.
       final deviceInfo = await DeviceInfoPlugin().androidInfo;
       if (deviceInfo.version.sdkInt <= 28) {
         var status = await Permission.storage.request();
@@ -88,7 +83,6 @@ class PdfSzolgaltatas {
         }
       }
     }
-    // iOS-en a Downloads mappa elérése automatikusan engedélyezett
 
     try {
       final directory = await getDownloadsDirectory();

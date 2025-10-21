@@ -91,7 +91,7 @@ class ErtesitesSzolgaltatas {
     print('Heti értesítés időzítve: "$title"');
   }
 
-  // === JAVÍTOTT SEGÉDFÜGGVÉNY ===
+  
   tz.TZDateTime _nextInstanceOfTenAM({bool isFirstTime = false}) {
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
     tz.TZDateTime scheduledDate = tz.TZDateTime(

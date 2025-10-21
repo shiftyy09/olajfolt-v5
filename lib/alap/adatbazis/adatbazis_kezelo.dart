@@ -18,14 +18,14 @@ class AdatbazisKezelo {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
-    // ========================================================
-    // ===               FONTOS VÁLTOZTATÁS ITT             ===
-    // ========================================================
+    
+    
+    
     return await openDatabase(path,
         version: 6, // <<<--- NÖVELD MEG A VERZIÓSZÁMOT!
         onCreate: _createAllTables,
         onUpgrade: _onUpgrade);
-    // ========================================================
+    
   }
 
   Future<void> _createAllTables(Database db, int version) async {
@@ -68,7 +68,7 @@ class AdatbazisKezelo {
         "Adatbázis séma frissítve $oldVersion verzióról $newVersion verzióra.");
   }
 
-  // === CRUD és egyéb műveletek (VÁLTOZATLANOK) ---
+  
   // ... (A többi függvényed, mint pl. getVehicles, insert, stb. itt változatlan marad)
   Future<int> insert(String table, Map<String, dynamic> row) async {
     final db = await database;

@@ -68,9 +68,9 @@ class _InditoKepernyoState extends State<InditoKepernyo>
     return Scaffold(
       backgroundColor: Colors.black,
       body: Center(
-        // =======================================================
-        // ===            ITT TÖRTÉNT A VÁLTOZTATÁS           ===
-        // =======================================================
+        
+        
+        
         // A Column-t kivettem, mert már csak egyetlen widget, a kép van benne.
         child: FadeTransition(
           opacity: _fadeAnimation,
@@ -81,7 +81,7 @@ class _InditoKepernyoState extends State<InditoKepernyo>
           ),
         ),
         // A Text("Szerviz-napló") és a SizedBox innen lett eltávolítva.
-        // =======================================================
+        
       ),
     );
   }

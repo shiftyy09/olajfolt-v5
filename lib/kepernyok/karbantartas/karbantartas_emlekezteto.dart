@@ -1,3 +1,4 @@
+// lib/kepernyok/karbantartas/karbantartas_emlekezteto.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -195,10 +196,13 @@ class _KarbantartasEmlekeztetoState extends State<KarbantartasEmlekezteto> {
                         color: Colors.amber)),
                 readOnly: isDateBased,
                 onTap: isDateBased ? () async {
-                  DateTime? pickedDate = await showDatePicker(context: context,
-                      initialDate: lastService.date,
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime.now());
+                  DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: lastService.date,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime.now(),
+                    locale: const Locale('hu', 'HU'),
+                  );
                   if (pickedDate != null) {
                     valueController.text =
                         DateFormat('yyyy.MM.dd').format(pickedDate);
@@ -213,6 +217,24 @@ class _KarbantartasEmlekeztetoState extends State<KarbantartasEmlekezteto> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
               onPressed: () async {
+                // === JAVÍTÁS: ELLENŐRZÉS HOZZÁADVA ===
+                if (!isDateBased) {
+                  final newMileage = int.tryParse(valueController.text);
+                  if (newMileage != null &&
+                      newMileage > _selectedVehicle!.mileage) {
+                    // Kontextus ellenőrzése a SnackBarhoz
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text(
+                            'A csere km-állása nem lehet nagyobb a jármű jelenlegi km-állásánál!'),
+                        backgroundColor: Colors.redAccent,
+                      ));
+                    }
+                    return; // Megszakítjuk a mentést
+                  }
+                }
+                // ===================================
+
                 Szerviz updatedService;
                 if (isDateBased) {
                   updatedService = lastService.copyWith(
@@ -503,8 +525,8 @@ class _KarbantartasEmlekeztetoState extends State<KarbantartasEmlekezteto> {
                   itemCount: cards.length,
                   itemBuilder: (context, index) =>
                       Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0),
-                      child: cards[index]));
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: cards[index]));
             },
           ),
         ),

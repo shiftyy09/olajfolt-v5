@@ -27,10 +27,10 @@ class _FogyasztasKalkulatorKepernyoState
   double _monthlyLiters = 0;
   bool _isLoading = true;
 
-  // === JAVÍTÁS KEZDETE ===
+  
   final UzemanyagArSzolgaltatas _arSzolgaltatas = UzemanyagArSzolgaltatas();
   late Future<UzemanyagArak?> _fuelPricesFuture; // Új állapotváltozó
-  // =====================
+  
 
   @override
   void initState() {
@@ -39,9 +39,9 @@ class _FogyasztasKalkulatorKepernyoState
     _priceController.addListener(_calculateTotal);
     _loadMonthlyStats();
 
-    // === JAVÍTÁS: A lekérdezést itt indítjuk, csak egyszer ===
+    
     _fuelPricesFuture = _arSzolgaltatas.fetchFuelPrices();
-    // =========================================================
+    
   }
 
   @override

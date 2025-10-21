@@ -2,7 +2,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-// Egy egyszerű osztály, ami a két árat tárolja
 class UzemanyagArak {
   final double benzinAr;
   final double gazolajAr;
@@ -11,41 +10,41 @@ class UzemanyagArak {
 }
 
 class UzemanyagArSzolgaltatas {
-  // A Holtankoljak.hu API végpontja
-  final String _apiUrl = "https://holtankoljak.hu/api/holtankoljak.json";
+  final String _apiUrl = "https://hu.fuelo.net/api/price.json";
 
   Future<UzemanyagArak?> fetchFuelPrices() async {
     try {
-      final response = await http.get(Uri.parse(_apiUrl));
+      // === VISSZAÁLLÍTOTTUK A USER-AGENTET A BIZTONSÁG KEDVÉÉRT ===
+      final response = await http.get(
+        Uri.parse(_apiUrl),
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
+        },
+      );
+      // ========================================================
 
       if (response.statusCode == 200) {
-        // Ha a kérés sikeres (200 OK)
-        final List<dynamic> data = json.decode(response.body);
+        // A Fuelo.net API JSON struktúrájának feldolgozása
+        final Map<String, dynamic> data = json.decode(response.body);
 
-        // Keressük meg a benzin és gázolaj árakat a listában
-        double benzin = 0;
-        double gazolaj = 0;
+        if (data.containsKey('fuels')) {
+          final fuels = data['fuels'];
+          final double benzin = (fuels['unleaded95'] as num?)?.toDouble() ?? 0;
+          final double gazolaj = (fuels['diesel'] as num?)?.toDouble() ?? 0;
 
-        for (var item in data) {
-          if (item['fuel_type'] == '95') {
-            benzin = (item['price'] as num).toDouble();
-          } else if (item['fuel_type'] == 'gasoil') {
-            gazolaj = (item['price'] as num).toDouble();
+          if (benzin > 0 && gazolaj > 0) {
+            print(
+                "Üzemanyagárak sikeresen lekérdezve (Fuelo.net): Benzin: $benzin, Gázolaj: $gazolaj");
+            return UzemanyagArak(benzinAr: benzin, gazolajAr: gazolaj);
           }
         }
-
-        if (benzin > 0 && gazolaj > 0) {
-          print(
-              "Üzemanyagárak sikeresen lekérdezve: Benzin: $benzin, Gázolaj: $gazolaj");
-          return UzemanyagArak(benzinAr: benzin, gazolajAr: gazolaj);
-        }
       }
-      // Ha a kérés sikertelen, vagy nem találtuk az árakat
-      print("API hiba: ${response.statusCode}");
+
+      print("API hiba (Fuelo.net): ${response.statusCode}");
+      print("Válasz törzse: ${response.body}"); // Ez segít a hibakeresésben
       return null;
     } catch (e) {
-      // Ha bármilyen hiba történik (pl. nincs internet)
-      print("Hiba az üzemanyagárak lekérdezése közben: $e");
+      print("Hiba az üzemanyagárak lekérdezése közben (Fuelo.net): $e");
       return null;
     }
   }

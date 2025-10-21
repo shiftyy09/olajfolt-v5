@@ -1,19 +1,22 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- ======================= ENGEDÉLYEK ======================= -->
-    <!-- Android 13+ verziókon ez kell az értesítések küldéséhez -->
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
-    <!-- Régebbi Android verziókhoz a fájlmentéshez -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+    <!-- === EZ A HIÁNYZÓ ENGEDÉLY AZ INTERNETHEZ === -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- =================================================== -->
+
+    <!-- Engedély az értesítések küldéséhez (Android 13+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <!-- Engedély a pontos időzítésű riasztásokhoz -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-
-    <!-- Új, biztonsági engedély a teljesség kedvéért -->
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
-    <!-- ========================================================== -->
 
+    <!-- Engedély a fájlmentéshez régebbi Android verziókon -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+
+    <!-- ========================================================== -->
 
     <application
         android:label="Olajfolt"

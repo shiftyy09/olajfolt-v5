@@ -33,7 +33,7 @@ class _SzerviznaploKepernyoState extends State<SzerviznaploKepernyo> {
     });
   }
 
-  // === ÚJ WIDGET: INFORMÁCIÓS ABLAK MEGNYITÁSA ===
+  
   void _showInfoDialog() {
     showDialog(
       context: context,
@@ -296,7 +296,7 @@ class _SzerviznaploKepernyoState extends State<SzerviznaploKepernyo> {
     );
   }
 
-  // === ÚJ WIDGET: A LÁTVÁNYOS SZERVIZKÁRTYA ===
+  
   Widget _buildServiceCard(Szerviz record) {
     // Színkódolás a bejegyzés típusa alapján
     final String desc = record.description.toLowerCase();

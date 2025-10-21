@@ -41,9 +41,9 @@ class _BeallitasokKepernyoState extends State<BeallitasokKepernyo> {
     await prefs.setBool('notificationsEnabled', value);
   }
 
-  // ========================================================
-  // ===     TELJES, MŰKÖDŐ FÜGGVÉNYEK A GOMBOKHOZ       ===
-  // ========================================================
+  
+  
+  
 
   Future<void> _handlePdfExport() async {
     if (_isProcessing) return;
