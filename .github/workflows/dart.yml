@@ -1,5 +1,4 @@
-# A munkafolyamat neve
-name: Build Olajfolt IPA
+name: Build Android APK
 
 on:
   push:
@@ -7,50 +6,34 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-ios:
-    runs-on: macos-latest
+  build_android:
+    runs-on: ubuntu-latest
 
     steps:
-      #1. Kód letöltése
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # 2. Xcode beállítása
-      - name: Setup Xcode
-        uses: maxim-lobanov/setup-xcode@v1
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          xcode-version: 'latest-stable'
+          distribution: 'zulu'
+          java-version: '17'
 
-      # 3. Flutter környezet beállítása
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.2' # Módosítsd a saját Flutter verziódra, ha szükséges!
-          # === JAVÍTÁS: Egy hivatalos, stabil verziót használunk ===
-          # Ez kompatibilis lesz a pubspec.yaml-ban beállított intl: ^0.19.0 verzióval
-          flutter-version: '3.19.6'
-          # =========================================================
-          channel: 'stable'
-          cache: true
+          flutter-version: '3.24.3'
 
-      # 4. Függőségek letöltése
-      - name: Get Flutter dependencies
+      - name: Check Flutter
+        run: flutter --version
+
+      - name: Get dependencies
         run: flutter pub get
 
-      # 5. iOS app buildelése
-      - name: Build unsigned iOS app
-        run: flutter build ios --release --no-codesign
+      - name: Build Android APK
+        run: flutter build apk --release
 
-      # 6. IPA fájl létrehozása
-      - name: Create Payload folder and IPA
-        run: |
-          mkdir -p Payload
-          cp -r build/ios/iphoneos/Runner.app Payload/
-          zip -r Olajfolt.ipa Payload/
-
-      # 7. IPA feltöltése
-      - name: Upload IPA artifact
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Olajfolt-IPA
-          path: Olajfolt.ipa
+          name: Gymflow-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
