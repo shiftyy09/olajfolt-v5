@@ -9,7 +9,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   flutter_localizations:
     sdk: flutter
 
@@ -17,7 +16,12 @@ dependencies:
   sqflite: ^2.3.0
   path: ^1.8.3
   shared_preferences: ^2.2.2
-  intl: ^0.20.2 # A hibaüzenetek alapján frissítve
+  
+  # === ITT VAN A JAVÍTÁS A GITHUB KOMPATIBILITÁSHOZ ===
+  # Visszaállítjuk a verziót, hogy a GitHub Actions is le tudja fordítani.
+  intl: ^0.19.0 
+  # ====================================================
+
   http: ^1.2.1
   dropdown_search: ^5.0.6
   diacritic: ^0.1.5
@@ -42,7 +46,13 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/fonts/
 
+  fonts:
+    - family: LicensePlate
+      fonts:
+        - asset: assets/fonts/license_plate.ttf
+          weight: 700
 
 flutter_launcher_icons:
   android: "launcher_icon"
