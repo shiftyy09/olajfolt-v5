@@ -1,56 +1,55 @@
-# A munkafolyamat neve, ami megjelenik a GitHub Actions fülön
+# A munkafolyamat neve
 name: Build Olajfolt IPA
 
-# Mikor fusson le a build?
 on:
-  # Ha valaki a 'main' ágra push-ol kódot
   push:
     branches: [ main ]
-  # Vagy ha kézzel elindítják a GitHub felületén
   workflow_dispatch:
 
 jobs:
   build-ios:
-    # A build-hez egy macOS virtuális gépet használunk
-    runs-on: macos-latest # A macos-15 elavult, a macos-latest mindig a legfrissebbet használja
+    runs-on: macos-latest
 
     steps:
-      # 1. lépés: Letölti a kódodat a repozitóriumból
+      #1. Kód letöltése
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. lépés: Beállítja az Xcode környezetet
+      # 2. Xcode beállítása
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: 'latest-stable' # Ajánlott a 'latest-stable' használata
+          xcode-version: 'latest-stable'
 
-      # 3. lépés: Beállítja a Flutter környezetet
+      # 3. Flutter környezet beállítása
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.32.8' # 
+          # === JAVÍTÁS: Egy hivatalos, stabil verziót használunk ===
+          # Ez kompatibilis lesz a pubspec.yaml-ban beállított intl: ^0.19.0 verzióval
+          flutter-version: '3.19.6'
+          # =========================================================
           channel: 'stable'
-          cache: true # Gyorsítja a buildet a függőségek gyorsítótárazásával
+          cache: true
 
-      # 4. lépés: Letölti a projekt függőségeit
+      # 4. Függőségek letöltése
       - name: Get Flutter dependencies
         run: flutter pub get
 
-      # 5. lépés: Létrehozza az ALÁÍRATLAN iOS alkalmazást (.app mappa)
+      # 5. iOS app buildelése
       - name: Build unsigned iOS app
         run: flutter build ios --release --no-codesign
 
-      # 6. lépés: Manuálisan létrehozza a telepíthető .ipa fájlt
+      # 6. IPA fájl létrehozása
       - name: Create Payload folder and IPA
         run: |
           mkdir -p Payload
           cp -r build/ios/iphoneos/Runner.app Payload/
           zip -r Olajfolt.ipa Payload/
 
-      # 7. lépés: Feltölti a kész .ipa fájlt a build "Artifacts" részébe
+      # 7. IPA feltöltése
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Olajfolt-IPA # Az artifact neve
-          path: Olajfolt.ipa # A feltöltendő fájl neve
+          name: Olajfolt-IPA
+          path: Olajfolt.ipa
