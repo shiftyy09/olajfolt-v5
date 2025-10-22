@@ -1,6 +1,6 @@
-// lib/alap/adatbazis/adatbazis_kezelo.dart
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import '../../modellek/karbantartas_bejegyzes.dart'; // FONTOS: Szükség van a Szerviz modell importálására
 
 class AdatbazisKezelo {
   static final AdatbazisKezelo instance = AdatbazisKezelo._privateConstructor();
@@ -18,8 +18,10 @@ class AdatbazisKezelo {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
+    // Az onCreate csak akkor fut le, ha az adatbázis még nem létezik.
+    // Az onUpgrade pedig akkor, ha a 'version' számot növeled.
     return await openDatabase(path,
-        version: 6, // <<<--- NÖVELD MEG A VERZIÓSZÁMOT!
+        version: 1, // Az alap verziószám
         onCreate: _createAllTables,
         onUpgrade: _onUpgrade);
   }
@@ -35,8 +37,7 @@ class AdatbazisKezelo {
         vin TEXT,
         mileage INTEGER NOT NULL,
         vezerlesTipusa TEXT,
-        imagePath TEXT,
-        muszakiErvenyesseg TEXT -- <<<--- ÚJ OSZLOP HOZZÁADVA
+        imagePath TEXT
       )
     ''');
 
@@ -47,24 +48,20 @@ class AdatbazisKezelo {
         description TEXT NOT NULL,
         date TEXT NOT NULL,
         mileage INTEGER NOT NULL,
-        cost REAL NOT NULL,
+        cost INTEGER NOT NULL, // Visszaállítva INTEGER-re, ahogy a többi részen használod
         FOREIGN KEY (vehicleId) REFERENCES vehicles(id) ON DELETE CASCADE
       )
     ''');
   }
 
-  // Ez a metódus lefut, ha a verziószám magasabb, mint az előző
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // Egyszerűsített megoldás: Eldobjuk a régi táblákat és újra létrehozzuk őket.
-    // Ez fejlesztés alatt a legegyszerűbb. Később lehet finomítani, hogy ne törölje az adatokat.
-    await db.execute('DROP TABLE IF EXISTS services');
-    await db.execute('DROP TABLE IF EXISTS vehicles');
-    await _createAllTables(db, newVersion);
-    print(
-        "Adatbázis séma frissítve $oldVersion verzióról $newVersion verzióra.");
+    // A jövőbeli séma módosításokhoz (pl. új oszlop) itt lehet ALTER TABLE parancsokat használni.
+    // A jelenlegi fejlesztési fázisban a DROP & CREATE a legegyszerűbb.
+    if (oldVersion < newVersion) {
+      // Itt implementálhatod a migrációs logikát, ha adatvesztés nélkül akarsz frissíteni.
+    }
   }
 
-  // ... (A többi függvényed, mint pl. getVehicles, insert, stb. itt változatlan marad)
   Future<int> insert(String table, Map<String, dynamic> row) async {
     final db = await database;
     return await db.insert(table, row);
@@ -91,11 +88,6 @@ class AdatbazisKezelo {
     return await db.query('vehicles', orderBy: 'make, model');
   }
 
-  Future<List<Map<String, dynamic>>> getServices() async {
-    final db = await database;
-    return await db.query('services');
-  }
-
   Future<List<Map<String, dynamic>>> getServicesForVehicle(
       int vehicleId) async {
     final db = await database;
@@ -105,10 +97,11 @@ class AdatbazisKezelo {
         orderBy: 'date DESC, mileage DESC');
   }
 
-  Future<int> deleteServicesForVehicle(int vehicleId) async {
+  Future<void> deleteServicesForVehicle(int vehicleId) async {
     final db = await database;
-    return await db
-        .delete('services', where: 'vehicleId = ?', whereArgs: [vehicleId]);
+    await db.delete(
+        'services', where: 'vehicleId = ? AND description NOT LIKE ?',
+        whereArgs: [vehicleId, 'Tankolás%']);
   }
 
   Future<void> clearAllData() async {
@@ -116,4 +109,34 @@ class AdatbazisKezelo {
     await db.delete('services');
     await db.delete('vehicles');
   }
+
+  // === ITT VANNAK A HIÁNYZÓ, ÚJ FÜGGVÉNYEK ===
+
+  // Új segédfüggvény, ami megkeres egy szervizt a leírása alapján
+  Future<Szerviz?> findServiceByDescription(int vehicleId,
+      String description) async {
+    final db = await instance.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'services',
+      where: 'vehicleId = ? AND description = ?',
+      whereArgs: [vehicleId, description],
+      limit: 1,
+    );
+    if (maps.isNotEmpty) {
+      return Szerviz.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  // Új segédfüggvény, ami törli az összes emlékeztető-alapú bejegyzést
+  Future<void> deleteReminderServicesForVehicle(int vehicleId) async {
+    final db = await instance.database;
+    await db.delete(
+      'services',
+      where: 'vehicleId = ? AND description LIKE ?',
+      whereArgs: [vehicleId, 'Emlékeztető alap:%'],
+    );
+  }
+// ============================================
+
 }

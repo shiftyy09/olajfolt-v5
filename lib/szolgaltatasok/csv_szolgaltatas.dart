@@ -19,13 +19,17 @@ class CsvSzolgaltatas {
 
     final db = AdatbazisKezelo.instance;
     final List<Map<String, dynamic>> vehicles = await db.getVehicles();
-    final List<Map<String, dynamic>> services = await db.getServices();
+
+    // === ITT VAN A JAVÍTÁS ===
+    // A 'getServices' helyett a helyes, általános 'queryAllRows' metódust hívjuk.
+    final List<Map<String, dynamic>> services = await db.queryAllRows(
+        'services');
+    // ========================
 
     if (vehicles.isEmpty && services.isEmpty) {
       return "empty";
     }
 
-    // CSV generálás logikája (változatlan)
     String vehicleCsv = "";
     if (vehicles.isNotEmpty) {
       List<List<dynamic>> vehicleRows = [
@@ -42,28 +46,23 @@ class CsvSzolgaltatas {
       ];
       serviceCsv = const ListToCsvConverter().convert(serviceRows);
     }
-    String combinedCsv =
-        "---VEHICLES---\n$vehicleCsv\n---SERVICES---\n$serviceCsv";
+    String combinedCsv = "---VEHICLES---\n$vehicleCsv\n---SERVICES---\n$serviceCsv";
 
     try {
       Directory? directory;
 
       if (Platform.isAndroid) {
-        // A legtöbb Android verzión ez a publikus tárhely gyökerébe mutat.
         directory = await getExternalStorageDirectory();
         if (directory == null) {
           print("Hiba: A külső tárhely nem elérhető.");
           return null;
         }
-        // Manuálisan hozzuk létre a "Download" almappát a gyökérben.
-        // Ez a mappa látható lesz a legtöbb fájlkezelőben.
         final downloadDir = Directory('${directory.path}/Download');
         if (!await downloadDir.exists()) {
           await downloadDir.create(recursive: true);
         }
         directory = downloadDir;
       } else if (Platform.isIOS) {
-        // iOS-en az alkalmazás dokumentum mappáját használjuk.
         directory = await getApplicationDocumentsDirectory();
       }
 
@@ -72,8 +71,8 @@ class CsvSzolgaltatas {
         return null;
       }
 
-      final String formattedDate =
-          DateFormat('yyyy-MM-dd_HH-mm').format(DateTime.now());
+      final String formattedDate = DateFormat('yyyy-MM-dd_HH-mm').format(
+          DateTime.now());
       final String fileName = "olajfolt_mentes_$formattedDate.csv";
       final File file = File("${directory.path}/$fileName");
 
@@ -86,7 +85,6 @@ class CsvSzolgaltatas {
     }
   }
 
-  // Javított, "bolondbiztos" import logika
   Future<ImportResult> importDataFromCsv() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -97,10 +95,11 @@ class CsvSzolgaltatas {
     }
 
     File file = File(result.files.single.path!);
-
     try {
       final String content = await file.readAsString();
-      if (content.trim().isEmpty) {
+      if (content
+          .trim()
+          .isEmpty) {
         return ImportResult.emptyFile;
       }
       if (!content.contains('---VEHICLES---') ||
@@ -116,27 +115,35 @@ class CsvSzolgaltatas {
       await db.clearAllData();
 
       if (vehiclePart.isNotEmpty) {
-        List<List<dynamic>> vehicleRows =
-            const CsvToListConverter(shouldParseNumbers: false)
-                .convert(vehiclePart);
+        List<List<dynamic>> vehicleRows = const CsvToListConverter(
+            shouldParseNumbers: false).convert(vehiclePart);
         if (vehicleRows.length > 1) {
-          List<String> headers =
-              vehicleRows[0].map((h) => h.toString()).toList();
+          List<String> headers = vehicleRows[0]
+              .map((h) => h.toString())
+              .toList();
           for (int i = 1; i < vehicleRows.length; i++) {
-            Map<String, dynamic> rowMap =
-                Map.fromIterables(headers, vehicleRows[i]);
+            Map<String, dynamic> rowMap = Map.fromIterables(
+                headers, vehicleRows[i]);
 
+            // Típuskonverziók a biztonság kedvéért
             rowMap['id'] = int.tryParse(rowMap['id']?.toString() ?? '');
             rowMap['year'] = int.tryParse(rowMap['year']?.toString() ?? '');
             rowMap['mileage'] =
                 int.tryParse(rowMap['mileage']?.toString() ?? '');
 
-            var muszakiDateString = rowMap['muszakiErvenyesseg']?.toString();
-            if (muszakiDateString == null ||
-                muszakiDateString.isEmpty ||
-                muszakiDateString.toLowerCase() == 'null') {
-              rowMap['muszakiErvenyesseg'] = null;
-            }
+            // Kihagyjuk azokat az oszlopokat, amik esetleg nincsenek a sémában
+            rowMap.removeWhere((key, value) =>
+            ![
+              'id',
+              'make',
+              'model',
+              'year',
+              'licensePlate',
+              'vin',
+              'mileage',
+              'vezerlesTipusa',
+              'imagePath'
+            ].contains(key));
 
             await db.insert('vehicles', rowMap);
           }
@@ -144,34 +151,28 @@ class CsvSzolgaltatas {
       }
 
       if (servicePart.isNotEmpty) {
-        List<List<dynamic>> serviceRows =
-            const CsvToListConverter(shouldParseNumbers: false)
-                .convert(servicePart);
+        List<List<dynamic>> serviceRows = const CsvToListConverter(
+            shouldParseNumbers: false).convert(servicePart);
         if (serviceRows.length > 1) {
-          List<String> headers =
-              serviceRows[0].map((h) => h.toString()).toList();
+          List<String> headers = serviceRows[0]
+              .map((h) => h.toString())
+              .toList();
           for (int i = 1; i < serviceRows.length; i++) {
-            Map<String, dynamic> rowMap =
-                Map.fromIterables(headers, serviceRows[i]);
+            Map<String, dynamic> rowMap = Map.fromIterables(
+                headers, serviceRows[i]);
 
             rowMap['id'] = int.tryParse(rowMap['id']?.toString() ?? '');
             rowMap['vehicleId'] =
                 int.tryParse(rowMap['vehicleId']?.toString() ?? '');
             rowMap['mileage'] =
                 int.tryParse(rowMap['mileage']?.toString() ?? '');
-            rowMap['cost'] = num.tryParse(rowMap['cost']?.toString() ?? '0');
-
-            var serviceDateString = rowMap['date']?.toString();
-            if (serviceDateString == null ||
-                serviceDateString.isEmpty ||
-                serviceDateString.toLowerCase() == 'null') {
-              rowMap['date'] = DateTime.now().toIso8601String();
-            }
+            rowMap['cost'] = int.tryParse(rowMap['cost']?.toString() ?? '0');
 
             await db.insert('services', rowMap);
           }
         }
       }
+
       return ImportResult.success;
     } catch (e) {
       print("Hiba a CSV importálás során: $e");

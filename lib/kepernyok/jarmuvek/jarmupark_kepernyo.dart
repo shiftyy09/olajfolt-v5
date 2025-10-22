@@ -56,8 +56,9 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
             backgroundColor: const Color(0xFF1E1E1E),
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15)),
-            title: const Text('Törlés megerősítése',
-                style: TextStyle(color: Colors.white)),
+            title:
+            const Text(
+                'Törlés megerősítése', style: TextStyle(color: Colors.white)),
             content: Text(
                 'Biztosan törölni szeretnéd a(z) ${vehicle.make} ${vehicle
                     .model} járművet és minden hozzá tartozó adatot?',
@@ -65,13 +66,13 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
             actions: [
               TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
-                  child:
-                  const Text('Mégse', style: TextStyle(color: Colors.white70))),
+                  child: const Text('Mégse')),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                 onPressed: () => Navigator.of(context).pop(true),
                 child: const Text('Törlés',
-                    style: TextStyle(
+                    style:
+                    TextStyle(
                         color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ],
@@ -152,14 +153,13 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-          onPressed: () => _navigateAndReload(const JarmuHozzaadasa()),
+          onPressed: () => _navigateAndReload(const JarmuHozzaadasaKepernyo()),
           backgroundColor: Colors.orange,
           tooltip: 'Új jármű hozzáadása',
           child: const Icon(Icons.add, color: Colors.black)),
     );
   }
 
-  // === ITT VAN AZ ÚJ, ÁTRENDEZETT DIZÁJN ===
   Widget _buildVehicleCard(Jarmu vehicle) {
     final logoPath = _getLogoPath(vehicle.make);
     final bool hasUserImage =
@@ -177,7 +177,6 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // FELSŐ RÉSZ: KÉP VAGY LOGÓ
             SizedBox(
               height: 150,
               width: double.infinity,
@@ -187,16 +186,13 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
                   errorBuilder: (c, e, s) => _buildLogoContainer(logoPath))
                   : _buildLogoContainer(logoPath),
             ),
-            // KÖZÉPSŐ RÉSZ: AZ ÚJ ELRENDEZÉS
             Padding(
               padding:
               const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
               child: Column(
                 children: [
-                  // 1. RENDSZÁMTÁBLA KIEMELVE
                   _buildLicensePlate(vehicle.licensePlate),
                   const SizedBox(height: 16),
-                  // 2. MÁRKA ÉS MODELL
                   Text(
                     '${vehicle.make} ${vehicle.model}',
                     textAlign: TextAlign.center,
@@ -207,7 +203,6 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  // 3. ÉVJÁRAT KIÍRVA
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -228,7 +223,6 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
                 ],
               ),
             ),
-            // ALSÓ RÉSZ: GOMBOK ÉS KM ÓRA ÁLLÁS
             Container(
               color: Colors.black.withOpacity(0.2),
               padding:
@@ -236,7 +230,6 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Bal oldali KM óra állás
                   Row(
                     children: [
                       Icon(Icons.speed_outlined,
@@ -250,7 +243,6 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
                       ),
                     ],
                   ),
-                  // Jobb oldali Szerkesztés/Törlés gombok
                   Row(
                     children: [
                       IconButton(
@@ -259,7 +251,8 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
                         tooltip: 'Jármű szerkesztése',
                         onPressed: () =>
                             _navigateAndReload(
-                                JarmuHozzaadasa(vehicleToEdit: vehicle)),
+                                JarmuHozzaadasaKepernyo(
+                                    vehicleToEdit: vehicle)),
                       ),
                       IconButton(
                         icon: const Icon(Icons.delete_outline,
@@ -278,7 +271,7 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
     );
   }
 
-  // === JAVÍTOTT, WIDGET-ALAPÚ RENDSZÁMTÁBLA, BETŰTÍPUS NÉLKÜL ===
+  // === JAVÍTOTT RENDSZÁMTÁBLA, CÍMER NÉLKÜL ===
   Widget _buildLicensePlate(String licensePlate) {
     final cleanPlate =
     licensePlate.replaceAll(RegExp(r'[^A-Z0-9]'), '').toUpperCase();
@@ -290,16 +283,13 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
     String part3 = '';
 
     if (isNewFormat && cleanPlate.length == 7) {
-      // Új formátum: AABB123
       part1 = cleanPlate.substring(0, 2);
       part2 = cleanPlate.substring(2, 4);
       part3 = cleanPlate.substring(4);
     } else if (cleanPlate.length == 6) {
-      // Régi formátum: ABC123
       part1 = cleanPlate.substring(0, 3);
       part3 = cleanPlate.substring(3);
     } else {
-      // Egyéb esetek
       part1 = cleanPlate;
     }
 
@@ -318,7 +308,7 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
         ],
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min, // A tartalomhoz igazodik
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -344,20 +334,13 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
             children: [
               Text(part1,
                   style: const TextStyle(
-                    // NINCS fontFamily, a rendszer alapértelmezett betűtípusát használja
                       color: Colors.black,
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 2)),
-              const SizedBox(width: 6),
-              if (isNewFormat) ...[
-                Image.asset('assets/images/hu_coat_of_arms.png',
-                    height: 26, errorBuilder: (c, e, s) => const SizedBox()),
-                const SizedBox(width: 6),
-              ],
+              // === A CÍMER ÉS A KÖRÜLÖTTE LÉVŐ ELVÁLASZTÓK EL LETTEK TÁVOLÍTVA ===
               Text(part2,
                   style: const TextStyle(
-                    // NINCS fontFamily
                       color: Colors.black,
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
@@ -373,7 +356,6 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
                 ),
               Text(part3,
                   style: const TextStyle(
-                    // NINCS fontFamily
                       color: Colors.black,
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
@@ -386,7 +368,6 @@ class _JarmuparkKepernyoState extends State<JarmuparkKepernyo> {
     );
   }
 
-  // A logó konténer változatlan marad.
   Widget _buildLogoContainer(String logoPath) {
     return Container(
       decoration: BoxDecoration(
